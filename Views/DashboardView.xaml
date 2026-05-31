@@ -1,0 +1,282 @@
+<UserControl x:Class="BayBrain.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:BayBrain.Converters"
+             Background="#1C1C1E">
+
+    <UserControl.Resources>
+        <conv:HexStringToBrushConverter  x:Key="HexBrush"/>
+        <conv:BoolToVisibilityConverter  x:Key="BoolVis"/>
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolVis"/>
+        <conv:PositiveIntToVisibilityConverter x:Key="PosIntVis"/>
+        <conv:MultiplyConverter          x:Key="Multiply"/>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,20">
+
+            <!-- ── Header ─────────────────────────────────────────── -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="{Binding DealershipName}" FontSize="22" FontWeight="SemiBold"
+                               Foreground="#FFFFFF"/>
+                    <TextBlock Text="{Binding DealershipLocation}" FontSize="13" Foreground="#8E8E93" Margin="0,2,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding LastRefreshed}" FontSize="12" Foreground="#636366"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ── KPI pill row ───────────────────────────────────── -->
+            <UniformGrid Columns="5" Margin="0,0,0,20">
+                <!-- ROs Today -->
+                <Border Background="#2C2C2E" CornerRadius="12" Margin="0,0,8,0" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock Text="🔧" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding TotalROsToday}" FontSize="28" FontWeight="Bold"
+                                   Foreground="#0A84FF" HorizontalAlignment="Center" Margin="0,4,0,2"/>
+                        <TextBlock Text="ROs Today" FontSize="11" Foreground="#8E8E93" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <!-- Critical Open -->
+                <Border Background="#2C2C2E" CornerRadius="12" Margin="4,0,4,0" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock Text="🚨" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding CriticalOpenItems}" FontSize="28" FontWeight="Bold"
+                                   Foreground="#FF453A" HorizontalAlignment="Center" Margin="0,4,0,2"/>
+                        <TextBlock Text="Critical Open" FontSize="11" Foreground="#8E8E93" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <!-- Team accuracy -->
+                <Border Background="#2C2C2E" CornerRadius="12" Margin="4,0,4,0" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock Text="🎯" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="#30D158"
+                                   HorizontalAlignment="Center" Margin="0,4,0,2">
+                            <TextBlock.Text>
+                                <Binding Path="TeamAvgAccuracy" StringFormat="{}{0:F0}%"/>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <TextBlock Text="Team Accuracy" FontSize="11" Foreground="#8E8E93" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <!-- Approval Rate -->
+                <Border Background="#2C2C2E" CornerRadius="12" Margin="4,0,4,0" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock Text="✅" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock FontSize="28" FontWeight="Bold" Foreground="#FFD60A"
+                                   HorizontalAlignment="Center" Margin="0,4,0,2">
+                            <TextBlock.Text>
+                                <Binding Path="TeamApprovalRate" StringFormat="{}{0:F0}%"/>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <TextBlock Text="Approval Rate" FontSize="11" Foreground="#8E8E93" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <!-- Advisors -->
+                <Border Background="#2C2C2E" CornerRadius="12" Margin="8,0,0,0" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock Text="👤" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding TotalAdvisors}" FontSize="28" FontWeight="Bold"
+                                   Foreground="#BF5AF2" HorizontalAlignment="Center" Margin="0,4,0,2"/>
+                        <TextBlock Text="Advisors" FontSize="11" Foreground="#8E8E93" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- ── Main content: 3-column ─────────────────────────── -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="280"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left column: weekly bars + category breakdown -->
+                <StackPanel Grid.Column="0">
+
+                    <!-- Weekly RO chart -->
+                    <Border Background="#2C2C2E" CornerRadius="12" Padding="20" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="ROs This Week" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="#FFFFFF" Margin="0,0,0,16"/>
+                            <ItemsControl ItemsSource="{Binding WeeklyROs}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding Count}" FontSize="11"
+                                                       HorizontalAlignment="Center" Margin="0,0,0,4">
+                                                <TextBlock.Foreground>
+                                                    <Binding Path="LabelColor" Converter="{StaticResource HexBrush}"/>
+                                                </TextBlock.Foreground>
+                                            </TextBlock>
+                                            <Border CornerRadius="3" Width="28" VerticalAlignment="Bottom"
+                                                    Height="{Binding BarHeight}" MinHeight="4">
+                                                <Border.Background>
+                                                    <Binding Path="BarColor" Converter="{StaticResource HexBrush}"/>
+                                                </Border.Background>
+                                            </Border>
+                                            <TextBlock Text="{Binding DayLabel}" FontSize="10"
+                                                       HorizontalAlignment="Center" Margin="0,6,0,0">
+                                                <TextBlock.Foreground>
+                                                    <Binding Path="LabelColor" Converter="{StaticResource HexBrush}"/>
+                                                </TextBlock.Foreground>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Category breakdown -->
+                    <Border Background="#2C2C2E" CornerRadius="12" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Services Performed by Category" FontSize="15"
+                                       FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,14"/>
+                            <ItemsControl ItemsSource="{Binding CategoryStats}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="26"/>
+                                                <ColumnDefinition Width="140"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="30"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Icon}" FontSize="14"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Category}"
+                                                       FontSize="12" Foreground="#EBEBF5"
+                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                            <Border Grid.Column="2" CornerRadius="3" Height="8"
+                                                    Width="{Binding BarWidth}" HorizontalAlignment="Left"
+                                                    Background="#0A84FF" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Count}"
+                                                       FontSize="12" Foreground="#8E8E93"
+                                                       VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="No performed services yet" FontSize="13"
+                                       Foreground="#636366" HorizontalAlignment="Center" Margin="0,20">
+                                <TextBlock.Visibility>
+                                    <Binding Path="CategoryStats.Count" Converter="{StaticResource PosIntVis}"
+                                             ConverterParameter="invert"/>
+                                </TextBlock.Visibility>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- Right column: top advisors + recent activity -->
+                <StackPanel Grid.Column="2">
+
+                    <!-- Top Advisors -->
+                    <Border Background="#2C2C2E" CornerRadius="12" Padding="18" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="🏆 Top Advisors" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="#FFFFFF" Margin="0,0,0,14"/>
+
+                            <!-- Empty state -->
+                            <TextBlock Text="No quiz sessions yet" FontSize="13" Foreground="#636366"
+                                       HorizontalAlignment="Center" Margin="0,10"
+                                       Visibility="{Binding HasAdvisors, Converter={StaticResource InvBoolVis}}"/>
+
+                            <ItemsControl ItemsSource="{Binding TopAdvisors}"
+                                          Visibility="{Binding HasAdvisors, Converter={StaticResource BoolVis}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="22"/>
+                                                <ColumnDefinition Width="36"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="44"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding RankDisplay}" FontSize="14"
+                                                       VerticalAlignment="Center"/>
+                                            <Border Grid.Column="1" Width="32" Height="32" CornerRadius="16"
+                                                    Margin="4,0,8,0"
+                                                    Background="{Binding AvatarColor, Converter={StaticResource HexBrush}}">
+                                                <TextBlock Text="{Binding Initials}" FontSize="11"
+                                                           FontWeight="Bold" Foreground="#FFFFFF"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontSize="12"
+                                                           Foreground="#EBEBF5" FontWeight="Medium"/>
+                                                <ProgressBar Value="{Binding Accuracy}" Maximum="100"
+                                                             Height="4" Margin="0,3,0,0"
+                                                             Background="#3A3A3C" Foreground="#30D158"
+                                                             BorderThickness="0"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="3" Text="{Binding AccuracyLabel}"
+                                                       FontSize="12" Foreground="#30D158"
+                                                       VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Recent Activity -->
+                    <Border Background="#2C2C2E" CornerRadius="12" Padding="18">
+                        <StackPanel>
+                            <TextBlock Text="⚡ Recent Activity" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="#FFFFFF" Margin="0,0,0,14"/>
+
+                            <TextBlock Text="No activity yet" FontSize="13" Foreground="#636366"
+                                       HorizontalAlignment="Center" Margin="0,10"
+                                       Visibility="{Binding HasActivity, Converter={StaticResource InvBoolVis}}"/>
+
+                            <ItemsControl ItemsSource="{Binding RecentActivity}"
+                                          Visibility="{Binding HasActivity, Converter={StaticResource BoolVis}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="26"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="50"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="24" Height="24" CornerRadius="12"
+                                                    Background="{Binding Color, Converter={StaticResource HexBrush}}"
+                                                    Opacity="0.2" VerticalAlignment="Top"/>
+                                            <TextBlock Text="{Binding Icon}" FontSize="13"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Top"
+                                                       Margin="0,2,0,0"/>
+                                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                <TextBlock Text="{Binding Title}" FontSize="12"
+                                                           Foreground="#EBEBF5" FontWeight="Medium"/>
+                                                <TextBlock Text="{Binding Detail}" FontSize="11"
+                                                           Foreground="#8E8E93" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Text="{Binding TimeLabel}"
+                                                       FontSize="10" Foreground="#636366"
+                                                       VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

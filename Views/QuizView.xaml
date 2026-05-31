@@ -1,0 +1,508 @@
+<UserControl x:Class="BayBrain.Views.QuizView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:BayBrain.Converters">
+
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter  x:Key="BoolVis"/>
+        <conv:NullToVisibilityConverter  x:Key="NullVis"/>
+        <conv:ScoreColorConverter        x:Key="ScoreColor"/>
+        <conv:QuizProgressConverter      x:Key="QuizProgress"/>
+        <conv:StringNotEmptyConverter    x:Key="StrVis"/>
+
+        <Style x:Key="AnswerButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FF2C2C2E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="18,14"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="12" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FF3A3A3C"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CategoryChipStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FF2C2C2E"/>
+            <Setter Property="Foreground" Value="#FF8E8E93"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="20" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FF3A3A3C"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#FF0D0D0F">
+
+        <!-- ══════════════════════════════════════════════════════
+             START / CATEGORY SELECTION SCREEN
+             ══════════════════════════════════════════════════════ -->
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="540">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding Quiz.IsInProgress}" Value="False"/>
+                                <Condition Binding="{Binding Quiz.IsComplete}"   Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <TextBlock Text="🎯" FontSize="68" HorizontalAlignment="Center"/>
+            <TextBlock Text="Advisor Quiz Mode" FontSize="28" FontWeight="Bold"
+                       HorizontalAlignment="Center" Foreground="White" Margin="0,14,0,6"/>
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="14"
+                       Foreground="#FF8E8E93" Margin="0,0,0,28" LineHeight="22">
+                Randomized questions across all service categories.
+                Filter by category to drill a specific area, or go All Categories for a full mixed session.
+            </TextBlock>
+
+            <!-- Stats strip -->
+            <Border Background="#FF1C1C1E" CornerRadius="16" Padding="24,18" Margin="0,0,0,28">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                        <TextBlock Text="20" FontSize="30" FontWeight="Bold"
+                                   HorizontalAlignment="Center" Foreground="#FF0A84FF"/>
+                        <TextBlock Text="Questions" FontSize="12" HorizontalAlignment="Center"
+                                   Foreground="#FF8E8E93"/>
+                        <TextBlock Text="in bank" FontSize="11" HorizontalAlignment="Center"
+                                   Foreground="#FF636366"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                        <TextBlock Text="10" FontSize="30" FontWeight="Bold"
+                                   HorizontalAlignment="Center" Foreground="#FF30D158"/>
+                        <TextBlock Text="Per Session" FontSize="12" HorizontalAlignment="Center"
+                                   Foreground="#FF8E8E93"/>
+                        <TextBlock Text="randomized" FontSize="11" HorizontalAlignment="Center"
+                                   Foreground="#FF636366"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                        <TextBlock Text="3" FontSize="30" FontWeight="Bold"
+                                   HorizontalAlignment="Center" Foreground="#FFFF9F0A"/>
+                        <TextBlock Text="Difficulty" FontSize="12" HorizontalAlignment="Center"
+                                   Foreground="#FF8E8E93"/>
+                        <TextBlock Text="levels" FontSize="11" HorizontalAlignment="Center"
+                                   Foreground="#FF636366"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ── Category picker ─────────────────────────────── -->
+            <TextBlock Text="CHOOSE CATEGORY" Foreground="#FF636366" FontSize="10"
+                       FontWeight="SemiBold" Margin="0,0,0,14"/>
+
+            <WrapPanel>
+                <ItemsControl ItemsSource="{Binding Quiz.AvailableCategories}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                    Content="{Binding}"
+                                    Command="{Binding DataContext.Quiz.StartWithCategoryCommand,
+                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource CategoryChipStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding}" Value="All Categories">
+                                                <Setter Property="Background" Value="#FF0A84FF"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </WrapPanel>
+
+            <!-- Active advisor indicator -->
+            <Border Background="#FF1C1C1E" CornerRadius="12" Padding="14,10"
+                    Margin="0,20,0,0"
+                    Visibility="{Binding AdvisorProfiles.ActiveAdvisor, Converter={StaticResource NullVis}}">
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="32" Height="32" CornerRadius="16"
+                            Background="{Binding AdvisorProfiles.ActiveAdvisor.AvatarColor}">
+                        <TextBlock Text="{Binding AdvisorProfiles.ActiveAdvisor.Initials}"
+                                   FontSize="12" FontWeight="Bold" Foreground="White"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Margin="10,0">
+                        <TextBlock FontSize="13" Foreground="White">
+                            <Run Text="Scoring as "/>
+                            <Run Text="{Binding AdvisorProfiles.ActiveAdvisor.Name}" FontWeight="SemiBold"/>
+                        </TextBlock>
+                        <TextBlock Text="Results will be saved to your profile"
+                                   FontSize="11" Foreground="#FF636366"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock FontSize="12" Foreground="#FF636366" TextAlignment="Center"
+                       Margin="0,16,0,0"
+                       Visibility="{Binding AdvisorProfiles.ActiveAdvisor, Converter={StaticResource NullVis}, ConverterParameter=invert}">
+                No active advisor selected — go to Profiles tab to track your scores.
+            </TextBlock>
+        </StackPanel>
+
+        <!-- ══════════════════════════════════════════════════════
+             ACTIVE QUIZ
+             ══════════════════════════════════════════════════════ -->
+        <Grid Visibility="{Binding Quiz.IsInProgress, Converter={StaticResource BoolVis}}"
+              MaxWidth="700" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Progress header -->
+            <Border Grid.Row="0" Padding="0,24,0,0">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="13" Foreground="#FF8E8E93">
+                                <Run Text="Question "/>
+                                <Run Text="{Binding Quiz.CurrentIndex}"
+                                     FontWeight="SemiBold" Foreground="White"/>
+                                <Run Text=" of "/>
+                                <Run Text="{Binding Quiz.TotalQuestions}"
+                                     FontWeight="SemiBold" Foreground="White"/>
+                            </TextBlock>
+                            <!-- Category label -->
+                            <Border Background="#FF2C2C2E" CornerRadius="8"
+                                    Padding="10,3" Margin="10,0,0,0"
+                                    Visibility="{Binding Quiz.SelectedCategory, Converter={StaticResource StrVis}}">
+                                <TextBlock Text="{Binding Quiz.SelectedCategory}"
+                                           FontSize="11" Foreground="#FF0A84FF" FontWeight="SemiBold"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock HorizontalAlignment="Right" FontSize="13"
+                                   FontWeight="SemiBold" Foreground="#FF30D158">
+                            <Run Text="✓  "/>
+                            <Run Text="{Binding Quiz.CorrectCount}"/>
+                            <Run Text=" correct"/>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Progress bar -->
+                    <Border Background="#FF2C2C2E" CornerRadius="4" Height="6" Margin="0,0,0,24">
+                        <Border CornerRadius="4" Height="6" HorizontalAlignment="Left"
+                                Background="#FF0A84FF">
+                            <Border.Width>
+                                <MultiBinding Converter="{StaticResource QuizProgress}">
+                                    <Binding Path="Quiz.CurrentIndex"/>
+                                    <Binding Path="Quiz.TotalQuestions"/>
+                                </MultiBinding>
+                            </Border.Width>
+                        </Border>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Question + Answers -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,0,28">
+                <StackPanel>
+                    <!-- Question text -->
+                    <Border Background="#FF1C1C1E" CornerRadius="16" Padding="24" Margin="0,0,0,20">
+                        <TextBlock Text="{Binding Quiz.CurrentQuestion.Question, FallbackValue='Loading…'}"
+                                   FontSize="18" FontWeight="SemiBold" Foreground="White"
+                                   TextWrapping="Wrap" LineHeight="28"/>
+                    </Border>
+
+                    <!-- Answer A -->
+                    <Button Style="{StaticResource AnswerButtonStyle}" HorizontalAlignment="Stretch"
+                            Command="{Binding Quiz.SelectAnswerCommand}" CommandParameter="0">
+                        <TextBlock TextWrapping="Wrap">
+                            <Run Text="A.   " FontWeight="Bold" Foreground="#FF0A84FF"/>
+                            <Run Text="{Binding Quiz.CurrentQuestion.Options[0], FallbackValue=''}"/>
+                        </TextBlock>
+                    </Button>
+                    <!-- Answer B -->
+                    <Button Style="{StaticResource AnswerButtonStyle}" HorizontalAlignment="Stretch"
+                            Command="{Binding Quiz.SelectAnswerCommand}" CommandParameter="1">
+                        <TextBlock TextWrapping="Wrap">
+                            <Run Text="B.   " FontWeight="Bold" Foreground="#FF0A84FF"/>
+                            <Run Text="{Binding Quiz.CurrentQuestion.Options[1], FallbackValue=''}"/>
+                        </TextBlock>
+                    </Button>
+                    <!-- Answer C -->
+                    <Button Style="{StaticResource AnswerButtonStyle}" HorizontalAlignment="Stretch"
+                            Command="{Binding Quiz.SelectAnswerCommand}" CommandParameter="2">
+                        <TextBlock TextWrapping="Wrap">
+                            <Run Text="C.   " FontWeight="Bold" Foreground="#FF0A84FF"/>
+                            <Run Text="{Binding Quiz.CurrentQuestion.Options[2], FallbackValue=''}"/>
+                        </TextBlock>
+                    </Button>
+                    <!-- Answer D -->
+                    <Button Style="{StaticResource AnswerButtonStyle}" HorizontalAlignment="Stretch"
+                            Command="{Binding Quiz.SelectAnswerCommand}" CommandParameter="3">
+                        <TextBlock TextWrapping="Wrap">
+                            <Run Text="D.   " FontWeight="Bold" Foreground="#FF0A84FF"/>
+                            <Run Text="{Binding Quiz.CurrentQuestion.Options[3], FallbackValue=''}"/>
+                        </TextBlock>
+                    </Button>
+
+                    <!-- Feedback panel -->
+                    <Border Background="#FF1C1C1E" CornerRadius="14" Padding="20"
+                            Margin="0,8,0,16"
+                            Visibility="{Binding Quiz.HasAnswered, Converter={StaticResource BoolVis}}">
+                        <StackPanel>
+                            <TextBlock FontSize="16" FontWeight="Bold" Margin="0,0,0,10">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Quiz.LastAnswerCorrect}" Value="True">
+                                                <Setter Property="Text" Value="✅  Correct!"/>
+                                                <Setter Property="Foreground" Value="#FF30D158"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Quiz.LastAnswerCorrect}" Value="False">
+                                                <Setter Property="Text" Value="❌  Not Quite"/>
+                                                <Setter Property="Foreground" Value="#FFFF453A"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Text="{Binding Quiz.FeedbackText}"
+                                       Foreground="White" FontSize="13"
+                                       TextWrapping="Wrap" LineHeight="22"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="Next Question  →"
+                            Background="#FF0A84FF" Foreground="White"
+                            FontWeight="SemiBold" FontSize="14"
+                            BorderThickness="0" Height="44" Padding="28,0"
+                            Cursor="Hand" HorizontalAlignment="Right"
+                            Command="{Binding Quiz.NextQuestionCommand}"
+                            Visibility="{Binding Quiz.HasAnswered, Converter={StaticResource BoolVis}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#FF409CFF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ══════════════════════════════════════════════════════
+             RESULTS SCREEN
+             ══════════════════════════════════════════════════════ -->
+        <Grid Visibility="{Binding Quiz.IsComplete, Converter={StaticResource BoolVis}}"
+              MaxWidth="700" HorizontalAlignment="Center">
+            <ScrollViewer Padding="0,24,0,24" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Score card -->
+                    <Border Background="#FF1C1C1E" CornerRadius="20" Padding="36,32" Margin="0,0,0,24">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="Session Complete!" FontSize="26" FontWeight="Bold"
+                                       HorizontalAlignment="Center" Foreground="White" Margin="0,0,0,4"/>
+
+                            <!-- Category badge -->
+                            <Border CornerRadius="12" Padding="14,5" HorizontalAlignment="Center"
+                                    Background="#FF2C2C2E" Margin="0,0,0,20"
+                                    Visibility="{Binding Quiz.SelectedCategory, Converter={StaticResource StrVis}}">
+                                <TextBlock Text="{Binding Quiz.SelectedCategory}"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#FF0A84FF"/>
+                            </Border>
+
+                            <TextBlock Text="{Binding Quiz.ScoreGrade}"
+                                       FontSize="18" HorizontalAlignment="Center"
+                                       Foreground="#FF8E8E93" Margin="0,0,0,24"/>
+
+                            <!-- Score circle -->
+                            <Border Width="130" Height="130" Margin="0,0,0,20"
+                                    HorizontalAlignment="Center">
+                                <Grid>
+                                    <Ellipse StrokeThickness="10" Stroke="#FF2C2C2E"/>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock FontSize="36" FontWeight="Bold" HorizontalAlignment="Center">
+                                            <TextBlock.Foreground>
+                                                <Binding Path="Quiz.ScorePercent" Converter="{StaticResource ScoreColor}"/>
+                                            </TextBlock.Foreground>
+                                            <Run Text="{Binding Quiz.CorrectCount}"/>
+                                            <Run Text="/" FontSize="20" Foreground="#FF8E8E93"/>
+                                            <Run Text="{Binding Quiz.TotalQuestions}" FontSize="20" Foreground="#FF8E8E93"/>
+                                        </TextBlock>
+                                        <TextBlock Text="correct" FontSize="12"
+                                                   HorizontalAlignment="Center"
+                                                   Foreground="#FF636366"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock HorizontalAlignment="Center" FontSize="30" FontWeight="Bold">
+                                <TextBlock.Foreground>
+                                    <Binding Path="Quiz.ScorePercent" Converter="{StaticResource ScoreColor}"/>
+                                </TextBlock.Foreground>
+                                <Run Text="{Binding Quiz.ScorePercent, StringFormat='{}{0:F0}'}"/>
+                                <Run Text="%" FontSize="20"/>
+                            </TextBlock>
+
+                            <!-- Profile saved indicator -->
+                            <Border Background="#FF2C2C2E" CornerRadius="10" Padding="14,8"
+                                    Margin="0,16,0,0" HorizontalAlignment="Center"
+                                    Visibility="{Binding AdvisorProfiles.ActiveAdvisor, Converter={StaticResource NullVis}}">
+                                <TextBlock FontSize="12" Foreground="#FF30D158">
+                                    <Run Text="✓  Saved to "/>
+                                    <Run Text="{Binding AdvisorProfiles.ActiveAdvisor.Name}" FontWeight="SemiBold"/>
+                                    <Run Text="'s profile"/>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Question breakdown -->
+                    <TextBlock Text="Question Breakdown" FontSize="17" FontWeight="SemiBold"
+                               Foreground="White" Margin="0,0,0,12"/>
+
+                    <ItemsControl ItemsSource="{Binding Quiz.ResultRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#FF1C1C1E" CornerRadius="10"
+                                        Padding="14,10" Margin="0,0,0,6">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="28"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="28"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Number}"
+                                                   FontSize="12" Foreground="#FF636366"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Question}"
+                                                   FontSize="13" Foreground="White"
+                                                   TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                        <Border Grid.Column="2" Background="#FF2C2C2E"
+                                                CornerRadius="6" Padding="8,3" Margin="8,0"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Category}"
+                                                       FontSize="10" Foreground="#FF8E8E93"/>
+                                        </Border>
+                                        <TextBlock Grid.Column="3" Text="{Binding StatusIcon}"
+                                                   FontSize="16" HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{Binding StatusColor}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Action buttons -->
+                    <Grid Margin="0,24,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="🔄  Try Again (Same Category)"
+                                Background="#FF2C2C2E" Foreground="White"
+                                FontWeight="SemiBold" FontSize="13"
+                                BorderThickness="0" Height="44" Cursor="Hand"
+                                Command="{Binding Quiz.RestartQuizCommand}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                            CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#FF3A3A3C"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <Button Grid.Column="2" Content="🎯  New Category"
+                                Background="#FF0A84FF" Foreground="White"
+                                FontWeight="SemiBold" FontSize="13"
+                                BorderThickness="0" Height="44" Cursor="Hand"
+                                Command="{Binding Quiz.StartWithCategoryCommand}"
+                                CommandParameter="All Categories">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                            CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#FF409CFF"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+    </Grid>
+</UserControl>
