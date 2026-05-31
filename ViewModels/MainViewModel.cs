@@ -68,19 +68,19 @@ namespace BayBrain.ViewModels
             _quiz = new QuizViewModel();
             _quiz.OnSessionCompleted = record => _advisorProfiles.RecordSession(record);
 
+            // ── History ───────────────────────────────────────────────
+            _history = new HistoryViewModel();
+            _history.Load(_allOrders);
+
             // ── RO Mode ───────────────────────────────────────────────
             _roMode = new ROViewModel(_search, _urgency);
             _roMode.OnROSaved = order =>
             {
                 _allOrders.Add(order);
                 DataLoaderService.SaveRepairOrders(_allOrders);
-                _history.Load(_allOrders);
+                History.Load(_allOrders);
                 RefreshDashboard();
             };
-
-            // ── History ───────────────────────────────────────────────
-            _history = new HistoryViewModel();
-            _history.Load(_allOrders);
 
             // ── Settings ──────────────────────────────────────────────
             _settings = new SettingsViewModel();
@@ -104,8 +104,8 @@ namespace BayBrain.ViewModels
 
         private void RefreshDashboard()
         {
-            _dashboard.Refresh(
-                _advisorProfiles.Profiles.ToList(),
+            Dashboard.Refresh(
+                AdvisorProfiles.Profiles.ToList(),
                 _allOrders,
                 _search.GetAllServices().Count,
                 _appSettings);

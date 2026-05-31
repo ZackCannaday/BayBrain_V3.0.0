@@ -1,0 +1,31 @@
+# Build output
+bin/
+obj/
+
+# User-specific IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / ReSharper
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs and crash dumps
+*.log
+*.dmp
+
+# OS files
+Thumbs.db
+Desktop.ini
+
