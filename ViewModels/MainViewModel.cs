@@ -19,6 +19,7 @@ namespace BayBrain.ViewModels
         // ── Search ──────────────────────────────────────────────────────
         [ObservableProperty] private string _searchQuery = string.Empty;
         [ObservableProperty] private ObservableCollection<ServiceItem> _searchResults = new();
+        [ObservableProperty] private ObservableCollection<ServiceCategoryGroup> _serviceGroups = new();
         [ObservableProperty] private ServiceItem? _selectedService;
         [ObservableProperty] private bool _hasResults = false;
         [ObservableProperty] private bool _showEmptyState = false;
@@ -115,6 +116,7 @@ namespace BayBrain.ViewModels
         {
             var all = _search.Search(string.Empty);
             SearchResults = new ObservableCollection<ServiceItem>(all);
+            RefreshServiceGroups(all);
             HasResults    = SearchResults.Count > 0;
             ShowEmptyState = false;
         }
@@ -162,8 +164,20 @@ namespace BayBrain.ViewModels
                 results = results.Where(r => r.Category == SelectedCategory).ToList();
 
             SearchResults  = new ObservableCollection<ServiceItem>(results);
+            RefreshServiceGroups(results);
             HasResults     = SearchResults.Count > 0;
             ShowEmptyState = !HasResults && !string.IsNullOrWhiteSpace(SearchQuery);
+        }
+
+        private void RefreshServiceGroups(IEnumerable<ServiceItem> services)
+        {
+            ServiceGroups = new ObservableCollection<ServiceCategoryGroup>(
+                services
+                    .GroupBy(s => s.Category)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new ServiceCategoryGroup(
+                        g.Key,
+                        new ObservableCollection<ServiceItem>(g.OrderBy(s => s.Name)))));
         }
 
         [RelayCommand]
@@ -239,6 +253,18 @@ namespace BayBrain.ViewModels
                 HasStatus = false;
             }
             catch (TaskCanceledException) { /* replaced by newer message */ }
+        }
+    }
+
+    public sealed class ServiceCategoryGroup
+    {
+        public string Category { get; }
+        public ObservableCollection<ServiceItem> Services { get; }
+
+        public ServiceCategoryGroup(string category, ObservableCollection<ServiceItem> services)
+        {
+            Category = category;
+            Services = services;
         }
     }
 }

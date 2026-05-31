@@ -5,6 +5,7 @@ obj/
 # User-specific IDE files
 .vs/
 .vscode/
+.codex/
 *.user
 *.suo
 *.userosscache
@@ -28,4 +29,3 @@ coverage/
 # OS files
 Thumbs.db
 Desktop.ini
-

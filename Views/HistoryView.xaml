@@ -138,30 +138,20 @@
                     </Grid>
                 </Border>
 
-                <!-- Category chips -->
-                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Disabled" Margin="16,0,16,8">
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton Style="{StaticResource FilterChip}" Content="All"
-                                     IsChecked="{Binding FilterCategory, Converter={StaticResource BoolVis}}"
-                                     Margin="0,0,6,0" GroupName="HistCat"
-                                     Command="{Binding DataContext.SetCategoryCommand,
-                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                     CommandParameter="All"/>
-                        <ItemsControl ItemsSource="{Binding CategoryFilters}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <RadioButton Style="{StaticResource FilterChip}"
-                                                 Content="{Binding}" Margin="0,0,6,0"
-                                                 GroupName="HistCat"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </ScrollViewer>
+                <!-- Category filter -->
+                <Grid Grid.Row="1" Margin="16,0,16,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Category" FontSize="12" Foreground="#8E8E93"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding CategoryFilters}"
+                              SelectedItem="{Binding FilterCategory}"
+                              MaxDropDownHeight="260"/>
+                </Grid>
 
                 <!-- Results list -->
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="16,0,16,16">

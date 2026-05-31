@@ -9,7 +9,19 @@
         MinWidth="1100" MinHeight="720"
         WindowStartupLocation="CenterScreen"
         Background="#FF0D0D0F"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI"
+        FocusManager.FocusedElement="{Binding ElementName=MainSearchBox}">
+
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="D1" Command="{Binding NavigateToCommand}" CommandParameter="0"/>
+        <KeyBinding Modifiers="Control" Key="D2" Command="{Binding NavigateToCommand}" CommandParameter="1"/>
+        <KeyBinding Modifiers="Control" Key="D3" Command="{Binding NavigateToCommand}" CommandParameter="2"/>
+        <KeyBinding Modifiers="Control" Key="D4" Command="{Binding NavigateToCommand}" CommandParameter="3"/>
+        <KeyBinding Modifiers="Control" Key="D5" Command="{Binding NavigateToCommand}" CommandParameter="4"/>
+        <KeyBinding Modifiers="Control" Key="D6" Command="{Binding NavigateToCommand}" CommandParameter="5"/>
+        <KeyBinding Modifiers="Control" Key="D7" Command="{Binding NavigateToCommand}" CommandParameter="6"/>
+        <KeyBinding Modifiers="Control" Key="D8" Command="{Binding NavigateToCommand}" CommandParameter="7"/>
+    </Window.InputBindings>
 
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -45,9 +57,14 @@
                 BorderBrush="#38383A"
                 BorderThickness="0,0,0,1">
             <Grid Margin="20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
                 <!-- Logo -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="🧠" FontSize="22" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBlock Text="BayBrain" FontSize="18" FontWeight="Bold"
                                Foreground="White" VerticalAlignment="Center"/>
@@ -56,6 +73,11 @@
                 </StackPanel>
 
                 <!-- Navigation buttons (centred) -->
+                <ScrollViewer Grid.Column="1"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Disabled"
+                              Margin="18,0"
+                              VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 
                     <Button Style="{StaticResource GhostButtonStyle}"
@@ -122,9 +144,10 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
+                </ScrollViewer>
 
                 <!-- Right: active advisor chip + version -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Border CornerRadius="16" Padding="10,5" Margin="0,0,14,0"
                             Background="#2C2C2E"
                             Visibility="{Binding AdvisorProfiles.ActiveAdvisor, Converter={StaticResource NullVis}}">
@@ -185,7 +208,8 @@
 
                                 <!-- Search box -->
                                 <Grid>
-                                    <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox x:Name="MainSearchBox"
+                                             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource SearchBoxStyle}" Height="44"/>
                                     <TextBlock Text="🔍" FontSize="15"
                                                HorizontalAlignment="Left" VerticalAlignment="Center"

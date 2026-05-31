@@ -122,10 +122,12 @@
                     <StackPanel Margin="0,0,0,10">
                         <TextBlock Text="Current Mileage *" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Style="{StaticResource FieldBoxStyle}"
-                                 FontSize="15" FontWeight="SemiBold">
+                                 FontSize="15" FontWeight="SemiBold"
+                                 PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                 DataObject.Pasting="NumberOnlyTextBox_Pasting">
                             <TextBox.Text>
                                 <Binding Path="RO.VehicleMileage"
-                                         UpdateSourceTrigger="PropertyChanged"
+                                         UpdateSourceTrigger="LostFocus"
                                          StringFormat="{}{0:N0}"/>
                             </TextBox.Text>
                         </TextBox>
@@ -171,10 +173,12 @@
                                 Margin="0,0,0,18">
                         <TextBlock Text="Mileage at last oil change"
                                    Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox Style="{StaticResource FieldBoxStyle}">
+                        <TextBox Style="{StaticResource FieldBoxStyle}"
+                                 PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                 DataObject.Pasting="NumberOnlyTextBox_Pasting">
                             <TextBox.Text>
                                 <Binding Path="RO.LastOilChangeMileage"
-                                         UpdateSourceTrigger="PropertyChanged"/>
+                                         UpdateSourceTrigger="LostFocus"/>
                             </TextBox.Text>
                         </TextBox>
                     </StackPanel>
