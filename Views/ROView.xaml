@@ -99,20 +99,22 @@
                             <TextBlock Text="Year" Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox ItemsSource="{Binding RO.YearOptions}"
                                       SelectedItem="{Binding RO.VehicleYear}"
-                                      Background="#FF2C2C2E" Foreground="White"
-                                      BorderBrush="#FF38383A" Height="36" FontSize="13"/>
+                                      MaxDropDownHeight="260"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Make" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding RO.VehicleMake, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldBoxStyle}"/>
+                            <ComboBox ItemsSource="{Binding RO.MakeOptions}"
+                                      SelectedItem="{Binding RO.VehicleMake, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      MaxDropDownHeight="260"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="4">
                             <TextBlock Text="Model" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding RO.VehicleModel, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldBoxStyle}"/>
+                            <ComboBox ItemsSource="{Binding RO.ModelOptions}"
+                                      SelectedItem="{Binding RO.VehicleModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEnabled="{Binding RO.HasSelectedMake}"
+                                      MaxDropDownHeight="260"/>
                         </StackPanel>
                     </Grid>
 
