@@ -26,7 +26,7 @@
                 </StackPanel>
                 <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom"
                            FontSize="12" Foreground="{StaticResource TextTertiaryBrush}">
-                    <Run Text="{Binding SearchResults.Count, FallbackValue=0}"/>
+                    <Run Text="{Binding SearchResults.Count, Mode=OneWay, FallbackValue=0}"/>
                     <Run Text=" services"/>
                 </TextBlock>
             </Grid>

@@ -51,7 +51,7 @@
                                Foreground="#FF636366" FontSize="10"
                                FontWeight="SemiBold"/>
                     <TextBlock Foreground="#FF8E8E93" FontSize="12" Margin="0,4,0,0">
-                        <Run Text="{Binding AdvisorProfiles.Profiles.Count, FallbackValue=0}"/>
+                        <Run Text="{Binding AdvisorProfiles.Profiles.Count, Mode=OneWay, FallbackValue=0}"/>
                         <Run Text=" advisors registered"/>
                     </TextBlock>
                     <Rectangle Height="1" Fill="#FF38383A" Margin="0,12,0,0"/>
@@ -339,7 +339,7 @@
 
                             <!-- Empty leaderboard -->
                             <StackPanel HorizontalAlignment="Center" Margin="0,40,0,0"
-                                        Visibility="{Binding AdvisorProfiles.Leaderboard.Count,
+                                        Visibility="{Binding AdvisorProfiles.Leaderboard.Count, Mode=OneWay,
                                             Converter={StaticResource BoolVis}, ConverterParameter=invert}">
                                 <TextBlock Text="🏆" FontSize="48" HorizontalAlignment="Center"/>
                                 <TextBlock Text="No completed sessions yet"
@@ -509,7 +509,7 @@
                     <!-- History empty -->
                     <TextBlock Text="No sessions completed yet — take a quiz to start tracking!"
                                FontSize="13" Foreground="#FF8E8E93"
-                               Visibility="{Binding AdvisorProfiles.SessionHistory.Count,
+                               Visibility="{Binding AdvisorProfiles.SessionHistory.Count, Mode=OneWay,
                                    Converter={StaticResource BoolVis}, ConverterParameter=invert}"/>
 
                     <ItemsControl ItemsSource="{Binding AdvisorProfiles.SessionHistory}">
