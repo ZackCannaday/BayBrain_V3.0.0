@@ -8,6 +8,7 @@
         <conv:NullToVisibilityConverter x:Key="NullVis"/>
         <conv:ScoreColorConverter       x:Key="ScoreColor"/>
         <conv:StringNotEmptyConverter   x:Key="StrVis"/>
+        <conv:EqualityToVisibilityConverter x:Key="EqVis"/>
 
         <Style x:Key="AvatarCircleStyle" TargetType="Border">
             <Setter Property="Width"  Value="48"/>
@@ -119,10 +120,14 @@
                                             <!-- Active badge + delete -->
                                             <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
                                                 <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,6"
-                                                        Background="#FF0A84FF"
-                                                        Visibility="{Binding DataContext.AdvisorProfiles.ActiveAdvisor.Id,
-                                                            RelativeSource={RelativeSource AncestorType=UserControl},
-                                                            Converter={StaticResource StrVis}}">
+                                                        Background="#FF0A84FF">
+                                                    <Border.Visibility>
+                                                        <MultiBinding Converter="{StaticResource EqVis}">
+                                                            <Binding Path="Id"/>
+                                                            <Binding Path="DataContext.AdvisorProfiles.ActiveAdvisor.Id"
+                                                                     RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                                        </MultiBinding>
+                                                    </Border.Visibility>
                                                     <TextBlock Text="ACTIVE" FontSize="9" FontWeight="Bold"
                                                                Foreground="White"/>
                                                 </Border>

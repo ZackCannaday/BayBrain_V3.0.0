@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
+using System.Windows;
 
 namespace BayBrain.ViewModels
 {
@@ -116,13 +117,11 @@ namespace BayBrain.ViewModels
                 };
                 if (dlg.ShowDialog() != true) return;
 
-                // Gather all JSON files beside the exe
-                var dir = AppDomain.CurrentDomain.BaseDirectory;
                 var files = new[] { "services.json", "quiz.json", "advisor_profiles.json", "repair_orders.json", "settings.json" };
                 using var zip = System.IO.Compression.ZipFile.Open(dlg.FileName, System.IO.Compression.ZipArchiveMode.Create);
                 foreach (var f in files)
                 {
-                    var path = Path.Combine(dir, f);
+                    var path = FindDataFile(f);
                     if (File.Exists(path)) zip.CreateEntryFromFile(path, f);
                 }
                 ShowFeedback($"Exported to {dlg.FileName}", "#30D158");
@@ -150,7 +149,13 @@ namespace BayBrain.ViewModels
                 foreach (var entry in zip.Entries)
                 {
                     if (entry.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-                    entry.ExtractToFile(Path.Combine(dir, entry.Name), overwrite: true);
+                    {
+                        var targetDir = entry.Name is "services.json" or "quiz.json"
+                            ? Path.Combine(dir, "Data")
+                            : dir;
+                        Directory.CreateDirectory(targetDir);
+                        entry.ExtractToFile(Path.Combine(targetDir, entry.Name), overwrite: true);
+                    }
                 }
                 ShowFeedback("Data imported! Restart app to apply.", "#FFD60A");
             }
@@ -163,6 +168,8 @@ namespace BayBrain.ViewModels
         [RelayCommand]
         private void ClearROHistory()
         {
+            if (!ConfirmDanger("Clear all repair order history? This cannot be undone.")) return;
+
             try
             {
                 DataLoaderService.SaveRepairOrders(new List<RepairOrder>());
@@ -178,6 +185,8 @@ namespace BayBrain.ViewModels
         [RelayCommand]
         private void ClearProfiles()
         {
+            if (!ConfirmDanger("Clear all advisor profiles and quiz history? This cannot be undone.")) return;
+
             try
             {
                 DataLoaderService.SaveProfiles(new List<AdvisorProfile>());
@@ -213,5 +222,25 @@ namespace BayBrain.ViewModels
             await Task.Delay(3500);
             ShowStatus    = false;
         }
+
+        private static string FindDataFile(string filename)
+        {
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+            return new[]
+            {
+                Path.Combine(dir, filename),
+                Path.Combine(dir, "Data", filename),
+                Path.Combine(Directory.GetCurrentDirectory(), filename),
+                Path.Combine(Directory.GetCurrentDirectory(), "Data", filename)
+            }.FirstOrDefault(File.Exists) ?? Path.Combine(dir, filename);
+        }
+
+        private static bool ConfirmDanger(string message)
+            => MessageBox.Show(
+                   message,
+                   "Confirm destructive action",
+                   MessageBoxButton.YesNo,
+                   MessageBoxImage.Warning,
+                   MessageBoxResult.No) == MessageBoxResult.Yes;
     }
 }

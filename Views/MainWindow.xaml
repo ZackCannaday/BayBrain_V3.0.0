@@ -503,17 +503,17 @@
 
             <!-- ── Tab 2: RO Mode ──────────────────────────────────────── -->
             <TabItem>
-                <views:ROView DataContext="{Binding RoMode}"/>
+                <views:ROView/>
             </TabItem>
 
             <!-- ── Tab 3: Quiz ─────────────────────────────────────────── -->
             <TabItem>
-                <views:QuizView DataContext="{Binding Quiz}"/>
+                <views:QuizView/>
             </TabItem>
 
             <!-- ── Tab 4: Advisor Profiles ─────────────────────────────── -->
             <TabItem>
-                <views:AdvisorProfileView DataContext="{Binding AdvisorProfiles}"/>
+                <views:AdvisorProfileView/>
             </TabItem>
 
             <!-- ── Tab 5: Dashboard ────────────────────────────────────── -->
