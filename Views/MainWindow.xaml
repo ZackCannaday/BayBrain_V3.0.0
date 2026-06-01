@@ -529,7 +529,31 @@
 
             <!-- ── Tab 7: Settings ─────────────────────────────────────── -->
             <TabItem>
-                <views:SettingsView DataContext="{Binding Settings}"/>
+                <Grid>
+                    <views:SettingsView DataContext="{Binding Settings}"
+                                        Visibility="{Binding IsAdminUnlocked, Converter={StaticResource BoolVis}}"/>
+                    <Border Background="#FF0D0D0F"
+                            Visibility="{Binding IsAdminUnlocked, Converter={StaticResource BoolVis}, ConverterParameter=invert}">
+                        <StackPanel Width="360" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="Admin Settings Locked"
+                                       FontSize="24" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding AdminUnlockMessage}"
+                                       TextWrapping="Wrap" TextAlignment="Center"
+                                       Foreground="#FF8E8E93" FontSize="13"
+                                       Margin="0,10,0,18"/>
+                            <TextBox Text="{Binding AdminPinEntry, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="12"
+                                     Height="40"
+                                     FontSize="16"
+                                     HorizontalContentAlignment="Center"/>
+                            <Button Content="Unlock Settings"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{Binding UnlockAdminCommand}"
+                                    Margin="0,12,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </TabItem>
 
         </TabControl>

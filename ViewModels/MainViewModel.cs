@@ -46,6 +46,9 @@ namespace BayBrain.ViewModels
         // ── Status bar ──────────────────────────────────────────────────
         [ObservableProperty] private string _statusMessage = string.Empty;
         [ObservableProperty] private bool _hasStatus = false;
+        [ObservableProperty] private bool _isAdminUnlocked = false;
+        [ObservableProperty] private string _adminPinEntry = string.Empty;
+        [ObservableProperty] private string _adminUnlockMessage = "Enter admin PIN to access Settings.";
 
         // Loaded data kept for Dashboard refresh
         private List<RepairOrder> _allOrders = new();
@@ -64,6 +67,11 @@ namespace BayBrain.ViewModels
 
             // ── Profiles ──────────────────────────────────────────────
             _advisorProfiles = new AdvisorProfileViewModel();
+            _advisorProfiles.ActiveAdvisorChanged = profile =>
+            {
+                RoMode.SetAdvisor(profile);
+                ShowStatus(profile == null ? "No active advisor." : $"Active advisor: {profile.Name}");
+            };
 
             // ── Quiz ──────────────────────────────────────────────────
             _quiz = new QuizViewModel();
@@ -141,9 +149,9 @@ namespace BayBrain.ViewModels
             if (value == 5) RefreshDashboard();
             if (value == 7)  // Settings tab
             {
-                _settings.RefreshStats(
+                Settings.RefreshStats(
                     _allOrders.Count,
-                    _advisorProfiles.Profiles.Count,
+                    AdvisorProfiles.Profiles.Count,
                     _search.GetAllServices().Count,
                     DataLoaderService.LoadQuiz().Count);
             }
@@ -234,7 +242,33 @@ namespace BayBrain.ViewModels
         private void NavigateTo(string tabIndex)
         {
             if (int.TryParse(tabIndex, out int idx))
+            {
                 SelectedTabIndex = idx;
+                if (idx == 7 && !IsAdminUnlocked)
+                {
+                    AdminUnlockMessage = "Enter admin PIN to access Settings.";
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void UnlockAdmin()
+        {
+            if (AdminPinEntry == _appSettings.AdminPin)
+            {
+                IsAdminUnlocked = true;
+                AdminPinEntry = string.Empty;
+                AdminUnlockMessage = "Admin access unlocked.";
+                Settings.RefreshStats(
+                    _allOrders.Count,
+                    AdvisorProfiles.Profiles.Count,
+                    _search.GetAllServices().Count,
+                    DataLoaderService.LoadQuiz().Count);
+                return;
+            }
+
+            AdminPinEntry = string.Empty;
+            AdminUnlockMessage = "Incorrect PIN. Default is 0000 until changed in settings.json.";
         }
 
         // ── Status message (auto-clears after 4 s) ─────────────────────

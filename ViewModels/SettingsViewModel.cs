@@ -19,6 +19,7 @@ namespace BayBrain.ViewModels
         [ObservableProperty] private string _dealershipLocation = "Augusta, GA";
         [ObservableProperty] private string _dealershipPhone    = "(706) 555-0100";
         [ObservableProperty] private string _advisorSignature   = string.Empty;
+        [ObservableProperty] private string _adminPin           = "0000";
 
         // ── Defaults ─────────────────────────────────────────────────────
         [ObservableProperty] private int _defaultUrgencyThreshold = 5;
@@ -49,6 +50,7 @@ namespace BayBrain.ViewModels
             DealershipLocation      = settings.DealershipLocation;
             DealershipPhone         = settings.DealershipPhone;
             AdvisorSignature        = settings.DefaultAdvisorSignature;
+            AdminPin                = string.IsNullOrWhiteSpace(settings.AdminPin) ? "0000" : settings.AdminPin;
             DefaultUrgencyThreshold = settings.DefaultUrgencyThreshold;
             AutoSaveROsOnClose      = settings.AutoSaveROsOnClose;
             PlayQuizSounds          = settings.PlayQuizSounds;
@@ -62,6 +64,7 @@ namespace BayBrain.ViewModels
             _settings.DealershipLocation      = DealershipLocation.Trim();
             _settings.DealershipPhone         = DealershipPhone.Trim();
             _settings.DefaultAdvisorSignature  = AdvisorSignature.Trim();
+            _settings.AdminPin                 = string.IsNullOrWhiteSpace(AdminPin) ? "0000" : AdminPin.Trim();
             _settings.DefaultUrgencyThreshold  = DefaultUrgencyThreshold;
             _settings.AutoSaveROsOnClose       = AutoSaveROsOnClose;
             _settings.PlayQuizSounds           = PlayQuizSounds;

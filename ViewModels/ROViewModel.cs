@@ -42,6 +42,8 @@ namespace BayBrain.ViewModels
 
         // ── Script for selected service ──────────────────────────────────
         [ObservableProperty] private string _selectedScript = string.Empty;
+        [ObservableProperty] private string _saveStatusMessage = string.Empty;
+        [ObservableProperty] private bool _hasSaveStatus = false;
 
         // ── History ──────────────────────────────────────────────────────
         [ObservableProperty] private ObservableCollection<RepairOrder> _recentOrders = new();
@@ -100,7 +102,14 @@ namespace BayBrain.ViewModels
         [RelayCommand]
         private void Analyze()
         {
-            if (VehicleMileage <= 0) return;
+            SaveStatusMessage = string.Empty;
+            HasSaveStatus = false;
+
+            if (VehicleMileage <= 0)
+            {
+                ShowSaveStatus("Enter current mileage before analyzing.");
+                return;
+            }
 
             IsLoading = true;
             var recs = _engine.Analyze(
@@ -122,7 +131,9 @@ namespace BayBrain.ViewModels
         }
 
         [RelayCommand]
-        private void Reset()
+        private void Reset() => ResetForm();
+
+        private void ResetForm(bool clearStatus = true)
         {
             VehicleYear  = DateTime.Now.Year;
             VehicleMake  = string.Empty;
@@ -138,6 +149,11 @@ namespace BayBrain.ViewModels
             IsAnalyzed = false;
             Recommendations.Clear();
             SelectedScript = string.Empty;
+            if (clearStatus)
+            {
+                SaveStatusMessage = string.Empty;
+                HasSaveStatus = false;
+            }
             CriticalCount = HighCount = MediumCount = TotalRecommended = ApprovedCount = 0;
         }
 
@@ -145,6 +161,7 @@ namespace BayBrain.ViewModels
         private void ToggleApproval(RecommendedService? rec)
         {
             if (rec == null) return;
+            SelectedRec = rec;
             if (rec.IsApproved)
             {
                 rec.IsApproved = false;
@@ -189,7 +206,23 @@ namespace BayBrain.ViewModels
         [RelayCommand]
         private void SaveRO()
         {
-            if (!IsAnalyzed || Recommendations.Count == 0) return;
+            if (!IsAnalyzed || Recommendations.Count == 0)
+            {
+                ShowSaveStatus("Analyze the vehicle before saving the RO.");
+                return;
+            }
+
+            if (VehicleMileage <= 0)
+            {
+                ShowSaveStatus("Current mileage is required before saving.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(VehicleMake) || string.IsNullOrWhiteSpace(VehicleModel))
+            {
+                ShowSaveStatus("Vehicle make and model are required before saving.");
+                return;
+            }
 
             var ro = new RepairOrder
             {
@@ -219,7 +252,35 @@ namespace BayBrain.ViewModels
             DataLoaderService.SaveRepairOrders(_allOrders);
             LoadHistory();
             OnROSaved?.Invoke(ro);
-            Reset();
+            ResetForm(clearStatus: false);
+            ShowSaveStatus("Repair order saved.");
+        }
+
+        [RelayCommand]
+        private void LoadRecentOrder(RepairOrder? order)
+        {
+            if (order == null) return;
+
+            VehicleYear = order.Year > 0 ? order.Year : DateTime.Now.Year;
+            VehicleMake = order.Make;
+            VehicleModel = order.Model;
+            VehicleMileage = order.Mileage;
+            VehicleVin = order.Vin;
+            CustomerName = order.CustomerName;
+            CustomerPhone = order.CustomerPhone;
+            AdvisorId = order.AdvisorId;
+            AdvisorName = order.AdvisorName;
+            Recommendations = new ObservableCollection<RecommendedService>(order.RecommendedServices);
+            IsAnalyzed = Recommendations.Count > 0;
+            var (crit, high, med, _) = _engine.GetTierCounts(Recommendations.ToList());
+            CriticalCount = crit;
+            HighCount = high;
+            MediumCount = med;
+            TotalRecommended = Recommendations.Count;
+            ApprovedCount = Recommendations.Count(r => r.IsApproved);
+            SelectedRec = null;
+            SelectedScript = string.Empty;
+            ShowSaveStatus("Loaded recent RO for review.");
         }
 
         partial void OnSelectedRecChanged(RecommendedService? value)
@@ -274,9 +335,14 @@ namespace BayBrain.ViewModels
 
         public void SetAdvisor(AdvisorProfile? profile)
         {
-            if (profile == null) return;
-            AdvisorId   = profile.Id;
-            AdvisorName = profile.Name;
+            AdvisorId   = profile?.Id ?? string.Empty;
+            AdvisorName = profile?.Name ?? string.Empty;
+        }
+
+        private void ShowSaveStatus(string message)
+        {
+            SaveStatusMessage = message;
+            HasSaveStatus = true;
         }
 
         /// <summary>

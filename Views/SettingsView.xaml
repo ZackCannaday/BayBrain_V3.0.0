@@ -137,6 +137,27 @@
                                      ToolTip="Appears at the bottom of exported scripts"/>
                         </StackPanel>
                     </Grid>
+
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Admin PIN" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                            <TextBox Style="{StaticResource FieldBox}"
+                                     Text="{Binding AdminPin, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="12"
+                                     ToolTip="Controls access to the Settings tab. Default is 0000."/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2"
+                                   Text="Settings access is a local convenience lock, not full user authentication."
+                                   TextWrapping="Wrap"
+                                   Foreground="#636366"
+                                   FontSize="12"
+                                   VerticalAlignment="Bottom"/>
+                    </Grid>
                 </StackPanel>
             </Border>
 

@@ -13,6 +13,7 @@ namespace BayBrain.Models
         // ── Advisor defaults ──────────────────────────────────────────────
         public string DefaultAdvisorId        { get; set; } = string.Empty;
         public string DefaultAdvisorSignature { get; set; } = string.Empty;
+        public string AdminPin                { get; set; } = "0000";
 
         // ── Display preferences ───────────────────────────────────────────
         public bool ShowPricesInSearch    { get; set; } = true;

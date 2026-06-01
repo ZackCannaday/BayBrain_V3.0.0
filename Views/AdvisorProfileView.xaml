@@ -79,7 +79,7 @@
                                     <Border Style="{StaticResource ProfileCardStyle}">
                                         <Border.InputBindings>
                                             <MouseBinding MouseAction="LeftClick"
-                                                          Command="{Binding DataContext.AdvisorProfiles.SelectAdvisorCommand,
+                                                          Command="{Binding DataContext.AdvisorProfiles.ViewProfileCommand,
                                                               RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                           CommandParameter="{Binding}"/>
                                         </Border.InputBindings>
@@ -136,6 +136,17 @@
                                                         Background="Transparent" BorderThickness="0"
                                                         Cursor="Hand" Padding="4"
                                                         Command="{Binding DataContext.AdvisorProfiles.DeleteProfileCommand,
+                                                            RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="Use"
+                                                        FontSize="11"
+                                                        Foreground="White"
+                                                        Background="#FF0A84FF"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        Padding="8,4"
+                                                        Margin="0,6,0,0"
+                                                        Command="{Binding DataContext.AdvisorProfiles.ActivateAdvisorCommand,
                                                             RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"/>
                                             </StackPanel>
@@ -398,6 +409,24 @@
                                 Cursor="Hand" VerticalAlignment="Top"
                                 Command="{Binding AdvisorProfiles.ToggleLeaderboardCommand}"/>
                     </Grid>
+
+                    <Border Background="#FF1C1C1E" CornerRadius="12" Padding="14,10" Margin="0,0,0,16">
+                        <Grid>
+                            <TextBlock Text="Viewing profile only. Click Use Advisor to make this profile active for quizzes and ROs."
+                                       Foreground="#FF8E8E93"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,120,0"/>
+                            <Button Content="Use Advisor"
+                                    HorizontalAlignment="Right"
+                                    Background="#FF0A84FF"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Padding="14,7"
+                                    Command="{Binding AdvisorProfiles.ActivateAdvisorCommand}"
+                                    CommandParameter="{Binding AdvisorProfiles.SelectedProfile}"/>
+                        </Grid>
+                    </Border>
 
                     <!-- Stats cards row -->
                     <Grid Margin="0,0,0,20">

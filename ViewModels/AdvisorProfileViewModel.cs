@@ -21,6 +21,8 @@ namespace BayBrain.ViewModels
         [ObservableProperty] private ObservableCollection<LeaderboardRow> _leaderboard = new();
         [ObservableProperty] private ObservableCollection<SessionHistoryRow> _sessionHistory = new();
 
+        public Action<AdvisorProfile?>? ActiveAdvisorChanged { get; set; }
+
         public static readonly string[] AvatarColors =
         {
             "#0A84FF", "#30D158", "#FF9F0A", "#FF453A",
@@ -130,13 +132,21 @@ namespace BayBrain.ViewModels
         }
 
         [RelayCommand]
-        private void SelectAdvisor(AdvisorProfile? profile)
+        private void ViewProfile(AdvisorProfile? profile)
+        {
+            if (profile == null) return;
+            SelectedProfile = profile;
+        }
+
+        [RelayCommand]
+        private void ActivateAdvisor(AdvisorProfile? profile)
         {
             if (profile == null) return;
             ActiveAdvisor = profile;
             SelectedProfile = profile;
             profile.LastActiveAt = DateTime.Now;
             DataLoaderService.SaveProfiles(_allProfiles);
+            ActiveAdvisorChanged?.Invoke(profile);
         }
 
         [RelayCommand]
