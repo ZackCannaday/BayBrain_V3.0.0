@@ -107,12 +107,12 @@
                                                            FontSize="14" FontWeight="SemiBold"
                                                            Foreground="White"/>
                                                 <TextBlock FontSize="11" Foreground="#FF8E8E93" Margin="0,3,0,0">
-                                                    <Run Text="{Binding TotalSessionsCompleted}"/>
+                                                    <Run Text="{Binding TotalSessionsCompleted, Mode=OneWay}"/>
                                                     <Run Text=" sessions  ·  "/>
-                                                    <Run Text="{Binding OverallAccuracy, StringFormat='{}{0:F0}'}"/>
+                                                    <Run Text="{Binding OverallAccuracy, Mode=OneWay, StringFormat='{}{0:F0}'}"/>
                                                     <Run Text="% avg"/>
                                                 </TextBlock>
-                                                <TextBlock Text="{Binding RankTitle}"
+                                                <TextBlock Text="{Binding RankTitle, Mode=OneWay}"
                                                            FontSize="11" Foreground="#FF636366"
                                                            Margin="0,2,0,0"/>
                                             </StackPanel>
@@ -307,7 +307,7 @@
                                                     <TextBlock Text="{Binding Profile.Name}"
                                                                FontSize="15" FontWeight="SemiBold"
                                                                Foreground="White"/>
-                                                    <TextBlock Text="{Binding Profile.RankTitle}"
+                                                    <TextBlock Text="{Binding Profile.RankTitle, Mode=OneWay}"
                                                                FontSize="12" Foreground="#FF8E8E93"
                                                                Margin="0,3,0,0"/>
                                                 </StackPanel>
@@ -315,7 +315,7 @@
                                                 <!-- Sessions -->
                                                 <StackPanel Grid.Column="3" HorizontalAlignment="Center"
                                                             VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Profile.TotalSessionsCompleted}"
+                                                    <TextBlock Text="{Binding Profile.TotalSessionsCompleted, Mode=OneWay}"
                                                                FontSize="22" FontWeight="Bold"
                                                                Foreground="White" HorizontalAlignment="Center"/>
                                                     <TextBlock Text="sessions" FontSize="11"
@@ -328,9 +328,9 @@
                                                     <TextBlock FontSize="22" FontWeight="Bold"
                                                                HorizontalAlignment="Center">
                                                         <TextBlock.Foreground>
-                                                            <Binding Path="Profile.OverallAccuracy" Converter="{StaticResource ScoreColor}"/>
+                                                            <Binding Path="Profile.OverallAccuracy" Mode="OneWay" Converter="{StaticResource ScoreColor}"/>
                                                         </TextBlock.Foreground>
-                                                        <Run Text="{Binding Profile.OverallAccuracy, StringFormat='{}{0:F0}'}"/>
+                                                        <Run Text="{Binding Profile.OverallAccuracy, Mode=OneWay, StringFormat='{}{0:F0}'}"/>
                                                         <Run Text="%" FontSize="16"/>
                                                     </TextBlock>
                                                     <TextBlock Text="accuracy" FontSize="11"
@@ -382,12 +382,12 @@
                         <StackPanel Grid.Column="1" Margin="18,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.Name}"
                                        FontSize="26" FontWeight="Bold" Foreground="White"/>
-                            <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.RankTitle}"
+                            <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.RankTitle, Mode=OneWay}"
                                        FontSize="14" Foreground="#FF0A84FF"
                                        FontWeight="SemiBold" Margin="0,4,0,0"/>
                             <TextBlock FontSize="12" Foreground="#FF636366" Margin="0,3,0,0">
                                 <Run Text="Member since "/>
-                                <Run Text="{Binding AdvisorProfiles.SelectedProfile.CreatedAt, StringFormat='MMMM yyyy'}"/>
+                                <Run Text="{Binding AdvisorProfiles.SelectedProfile.CreatedAt, Mode=OneWay, StringFormat='MMMM yyyy'}"/>
                             </TextBlock>
                         </StackPanel>
 
@@ -416,7 +416,7 @@
                             <StackPanel>
                                 <TextBlock Text="SESSIONS" Foreground="#FF636366" FontSize="9"
                                            FontWeight="SemiBold" Margin="0,0,0,8"/>
-                                <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.TotalSessionsCompleted}"
+                                <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.TotalSessionsCompleted, Mode=OneWay}"
                                            FontSize="32" FontWeight="Bold" Foreground="White"
                                            HorizontalAlignment="Center"/>
                                 <TextBlock Text="completed" FontSize="11" Foreground="#FF636366"
@@ -431,10 +431,10 @@
                                            FontWeight="SemiBold" Margin="0,0,0,8"/>
                                 <TextBlock FontSize="32" FontWeight="Bold" HorizontalAlignment="Center">
                                     <TextBlock.Foreground>
-                                        <Binding Path="AdvisorProfiles.SelectedProfile.OverallAccuracy"
+                                        <Binding Path="AdvisorProfiles.SelectedProfile.OverallAccuracy" Mode="OneWay"
                                                  Converter="{StaticResource ScoreColor}"/>
                                     </TextBlock.Foreground>
-                                    <Run Text="{Binding AdvisorProfiles.SelectedProfile.OverallAccuracy, StringFormat='{}{0:F0}'}"/>
+                                    <Run Text="{Binding AdvisorProfiles.SelectedProfile.OverallAccuracy, Mode=OneWay, StringFormat='{}{0:F0}'}"/>
                                     <Run Text="%" FontSize="22"/>
                                 </TextBlock>
                                 <TextBlock Text="overall" FontSize="11" Foreground="#FF636366"
@@ -449,7 +449,7 @@
                                            FontWeight="SemiBold" Margin="0,0,0,8"/>
                                 <TextBlock FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"
                                            Foreground="#FFFFD700">
-                                    <Run Text="{Binding AdvisorProfiles.SelectedProfile.BestScore, StringFormat='{}{0:F0}'}"/>
+                                    <Run Text="{Binding AdvisorProfiles.SelectedProfile.BestScore, Mode=OneWay, StringFormat='{}{0:F0}'}"/>
                                     <Run Text="%" FontSize="22" Foreground="#FFFFD700"/>
                                 </TextBlock>
                                 <TextBlock Text="personal best" FontSize="11" Foreground="#FF636366"
@@ -464,10 +464,10 @@
                                            FontWeight="SemiBold" Margin="0,0,0,8"/>
                                 <TextBlock FontSize="32" FontWeight="Bold" HorizontalAlignment="Center">
                                     <TextBlock.Foreground>
-                                        <Binding Path="AdvisorProfiles.SelectedProfile.RecentTrend"
+                                        <Binding Path="AdvisorProfiles.SelectedProfile.RecentTrend" Mode="OneWay"
                                                  Converter="{StaticResource ScoreColor}"/>
                                     </TextBlock.Foreground>
-                                    <Run Text="{Binding AdvisorProfiles.SelectedProfile.RecentTrend, StringFormat='{}{0:+0.0;-0.0;0.0}'}"/>
+                                    <Run Text="{Binding AdvisorProfiles.SelectedProfile.RecentTrend, Mode=OneWay, StringFormat='{}{0:+0.0;-0.0;0.0}'}"/>
                                     <Run Text="%" FontSize="22"/>
                                 </TextBlock>
                                 <TextBlock Text="recent trend" FontSize="11" Foreground="#FF636366"
@@ -489,7 +489,7 @@
                                 <TextBlock Text="💪  STRONGEST CATEGORY" Foreground="#FF636366"
                                            FontSize="9" FontWeight="SemiBold"
                                            Margin="0,0,0,10"/>
-                                <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.StrongestCategory}"
+                                <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.StrongestCategory, Mode=OneWay}"
                                            FontSize="16" FontWeight="SemiBold"
                                            Foreground="#FF30D158"/>
                             </StackPanel>
@@ -500,7 +500,7 @@
                                 <TextBlock Text="📚  NEEDS IMPROVEMENT" Foreground="#FF636366"
                                            FontSize="9" FontWeight="SemiBold"
                                            Margin="0,0,0,10"/>
-                                <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.WeakestCategory}"
+                                <TextBlock Text="{Binding AdvisorProfiles.SelectedProfile.WeakestCategory, Mode=OneWay}"
                                            FontSize="16" FontWeight="SemiBold"
                                            Foreground="#FFFF9F0A"/>
                             </StackPanel>

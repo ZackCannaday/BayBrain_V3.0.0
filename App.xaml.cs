@@ -8,6 +8,9 @@ namespace BayBrain
 {
     public partial class App : Application
     {
+        private static string _lastDispatcherError = string.Empty;
+        private static DateTime _lastDispatcherErrorShownAt = DateTime.MinValue;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             // Register global exception handlers
@@ -21,7 +24,17 @@ namespace BayBrain
         private void App_DispatcherUnhandledException(object? sender, DispatcherUnhandledExceptionEventArgs e)
         {
             LogException("DispatcherUnhandledException", e.Exception);
-            MessageBox.Show("An unexpected error occurred. See crash.log for details.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            var signature = $"{e.Exception.GetType().FullName}:{e.Exception.Message}";
+            var shouldShow = signature != _lastDispatcherError ||
+                             DateTime.Now - _lastDispatcherErrorShownAt > TimeSpan.FromSeconds(10);
+
+            if (shouldShow)
+            {
+                _lastDispatcherError = signature;
+                _lastDispatcherErrorShownAt = DateTime.Now;
+                MessageBox.Show("An unexpected error occurred. See crash.log for details.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
             e.Handled = true;
         }
 
