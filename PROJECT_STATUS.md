@@ -12,11 +12,13 @@ BayBrain is a WPF desktop application for automotive service advisors. The core 
 
 - ✅ **9 Value Converters** (created: fixes XAML binding issues)
 - ✅ **7 ViewModels** with full MVVM implementation
-- ✅ **6 Core Models** with nested classes for rich data structures
-- ✅ **6 Services** handling business logic, data loading, and script generation
+- ✅ **7 Core Models** with nested classes for rich data structures
+- ✅ **7 Services** handling business logic, data loading, local auth, and script generation
 - ✅ **2 JSON Data Files** with service catalog and quiz questions
 - ✅ **12 XAML Views** for UI layouts
 - ✅ **Binding Alias** added (RO property) for MainViewModel XAML compatibility
+- ✅ **Local User Roles** — Added persisted Admin/Manager/Advisor accounts with PIN hashing and a full-app login gate
+- ✅ **RO Save Hardening** — Fixed duplicate save path and blocked incomplete RO saves
 
 ---
 
@@ -48,6 +50,7 @@ BayBrain is a WPF desktop application for automotive service advisors. The core 
 - `QuizQuestion` (+ nested `QuizSession`, `QuizAnswer`) — Quiz questions and session management
 - `UrgencyScore` (+ `UrgencyLevel` enum) — Dynamic urgency calculation with color/label
 - `AppSettings` — App configuration and preferences
+- `UserAccount` — Local users, roles, account state, and advisor-profile links
 
 ### Services
 
@@ -59,6 +62,7 @@ BayBrain is a WPF desktop application for automotive service advisors. The core 
 - `ScriptGeneratorService` — Personalized customer communication scripts
 - `ScriptPrintService` — Print/export functionality (HTML and printing)
 - `RORecommendationEngine` — Mileage-based service recommendations for Repair Orders
+- `AuthService` — Local users, first-run admin bootstrap, salted PIN hashing
 
 ### ViewModels
 
@@ -70,7 +74,7 @@ BayBrain is a WPF desktop application for automotive service advisors. The core 
 - `AdvisorProfileViewModel` — Advisor training profiles and leaderboards
 - `DashboardViewModel` — Statistics dashboard and reporting
 - `HistoryViewModel` — Historical Repair Order browser
-- `SettingsViewModel` — Application settings management
+- `SettingsViewModel` — Application settings and account management
 
 ### Data Files
 
@@ -298,7 +302,9 @@ BayBrain/
 - [ ] Print/export to HTML works
 - [ ] Advisor profiles save and load
 - [ ] Repair orders persist across sessions
-- [ ] Settings apply and persist
+- [x] Settings apply and persist
+- [x] Local login blocks app access until a valid user signs in
+- [x] Settings are restricted to Admin/Manager users
 - [ ] All XAML bindings resolve without binding errors
 
 ---

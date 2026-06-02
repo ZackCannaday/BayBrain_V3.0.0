@@ -13,6 +13,7 @@ namespace BayBrain.ViewModels
     public partial class SettingsViewModel : ObservableObject
     {
         private AppSettings _settings = new();
+        private readonly AuthService _auth = new();
 
         // ── Dealership info ──────────────────────────────────────────────
         [ObservableProperty] private string _dealershipName     = "Bay Auto Group";
@@ -42,6 +43,17 @@ namespace BayBrain.ViewModels
         [ObservableProperty] private int _profileCount  = 0;
         [ObservableProperty] private int _serviceCount  = 0;
         [ObservableProperty] private int _quizCount     = 0;
+        [ObservableProperty] private int _userCount     = 0;
+
+        // ── User/account management ─────────────────────────────────────
+        [ObservableProperty] private ObservableCollection<UserAccount> _users = new();
+        [ObservableProperty] private ObservableCollection<AdvisorProfile> _advisorProfileOptions = new();
+        [ObservableProperty] private ObservableCollection<string> _roleOptions = new(new[] { "Advisor", "Manager", "Admin" });
+        [ObservableProperty] private string _newUsername = string.Empty;
+        [ObservableProperty] private string _newDisplayName = string.Empty;
+        [ObservableProperty] private string _newUserRole = "Advisor";
+        [ObservableProperty] private string _newUserPin = string.Empty;
+        [ObservableProperty] private AdvisorProfile? _selectedAdvisorForUser;
 
         public void Load(AppSettings settings)
         {
@@ -56,6 +68,7 @@ namespace BayBrain.ViewModels
             PlayQuizSounds          = settings.PlayQuizSounds;
             ShowMileageWarnings     = settings.ShowMileageWarnings;
             ExportFolder            = settings.ExportFolder;
+            RefreshUsers();
         }
 
         public AppSettings BuildSettings()
@@ -120,7 +133,7 @@ namespace BayBrain.ViewModels
                 };
                 if (dlg.ShowDialog() != true) return;
 
-                var files = new[] { "services.json", "quiz.json", "advisor_profiles.json", "repair_orders.json", "settings.json" };
+                var files = new[] { "services.json", "quiz.json", "advisor_profiles.json", "repair_orders.json", "settings.json", "users.json" };
                 using var zip = System.IO.Compression.ZipFile.Open(dlg.FileName, System.IO.Compression.ZipArchiveMode.Create);
                 foreach (var f in files)
                 {
@@ -215,6 +228,61 @@ namespace BayBrain.ViewModels
             ProfileCount = profiles;
             ServiceCount = services;
             QuizCount    = quiz;
+            UserCount    = Users.Count;
+        }
+
+        [RelayCommand]
+        private void CreateUser()
+        {
+            if (string.IsNullOrWhiteSpace(NewUsername))
+            {
+                ShowFeedback("Username is required.", "#FF453A");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewUserPin) || NewUserPin.Trim().Length < 4)
+            {
+                ShowFeedback("PIN must be at least 4 characters.", "#FF453A");
+                return;
+            }
+
+            if (!Enum.TryParse<UserRole>(NewUserRole, out var role))
+            {
+                ShowFeedback("Select a valid role.", "#FF453A");
+                return;
+            }
+
+            var linkedProfileId = role == UserRole.Advisor ? SelectedAdvisorForUser?.Id ?? string.Empty : string.Empty;
+            var account = _auth.CreateUser(NewUsername, NewDisplayName, role, NewUserPin.Trim(), linkedProfileId);
+            if (!_auth.AddUser(account))
+            {
+                ShowFeedback("Could not create user. Username may already exist.", "#FF453A");
+                return;
+            }
+
+            NewUsername = string.Empty;
+            NewDisplayName = string.Empty;
+            NewUserPin = string.Empty;
+            NewUserRole = "Advisor";
+            SelectedAdvisorForUser = null;
+            RefreshUsers();
+            ShowFeedback("User account created.", "#30D158");
+        }
+
+        [RelayCommand]
+        private void DeactivateUser(UserAccount? account)
+        {
+            if (account == null) return;
+            if (account.Role == UserRole.Admin && Users.Count(u => u.IsActive && u.Role == UserRole.Admin) <= 1)
+            {
+                ShowFeedback("Cannot deactivate the last active admin.", "#FF453A");
+                return;
+            }
+
+            account.IsActive = false;
+            _auth.Save();
+            RefreshUsers();
+            ShowFeedback("User deactivated.", "#FFD60A");
         }
 
         private async void ShowFeedback(string msg, string color)
@@ -224,6 +292,14 @@ namespace BayBrain.ViewModels
             ShowStatus    = true;
             await Task.Delay(3500);
             ShowStatus    = false;
+        }
+
+        private void RefreshUsers()
+        {
+            _auth.Load();
+            Users = new ObservableCollection<UserAccount>(_auth.Users.OrderByDescending(u => u.IsActive).ThenBy(u => u.DisplayName));
+            AdvisorProfileOptions = new ObservableCollection<AdvisorProfile>(DataLoaderService.LoadProfiles().OrderBy(p => p.Name));
+            UserCount = Users.Count;
         }
 
         private static string FindDataFile(string filename)

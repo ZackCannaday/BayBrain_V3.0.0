@@ -105,6 +105,12 @@ namespace BayBrain.ViewModels
             SaveStatusMessage = string.Empty;
             HasSaveStatus = false;
 
+            if (!HasVehicleIdentity())
+            {
+                ShowSaveStatus("Select year, make, and model before analyzing.");
+                return;
+            }
+
             if (VehicleMileage <= 0)
             {
                 ShowSaveStatus("Enter current mileage before analyzing.");
@@ -212,15 +218,21 @@ namespace BayBrain.ViewModels
                 return;
             }
 
+            if (!HasVehicleIdentity())
+            {
+                ShowSaveStatus("Vehicle year, make, and model are required before saving.");
+                return;
+            }
+
             if (VehicleMileage <= 0)
             {
                 ShowSaveStatus("Current mileage is required before saving.");
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(VehicleMake) || string.IsNullOrWhiteSpace(VehicleModel))
+            if (string.IsNullOrWhiteSpace(AdvisorName))
             {
-                ShowSaveStatus("Vehicle make and model are required before saving.");
+                ShowSaveStatus("An active advisor is required before saving. Sign in as a linked advisor or use an advisor profile from Profiles.");
                 return;
             }
 
@@ -230,7 +242,7 @@ namespace BayBrain.ViewModels
                 Make          = VehicleMake,
                 Model         = VehicleModel,
                 Mileage       = VehicleMileage,
-                Vin           = VehicleVin,
+                Vin           = VehicleVin.Trim().ToUpperInvariant(),
                 CustomerName  = CustomerName,
                 CustomerPhone = CustomerPhone,
                 AdvisorId     = AdvisorId,
@@ -318,6 +330,12 @@ namespace BayBrain.ViewModels
             }
         }
 
+        partial void OnVehicleVinChanged(string value)
+        {
+            var normalized = value.Trim().ToUpperInvariant();
+            if (value != normalized) VehicleVin = normalized;
+        }
+
         private void LoadHistory()
         {
             _allOrders = DataLoaderService.LoadRepairOrders();
@@ -344,6 +362,11 @@ namespace BayBrain.ViewModels
             SaveStatusMessage = message;
             HasSaveStatus = true;
         }
+
+        private bool HasVehicleIdentity()
+            => VehicleYear > 1900 &&
+               !string.IsNullOrWhiteSpace(VehicleMake) &&
+               !string.IsNullOrWhiteSpace(VehicleModel);
 
         /// <summary>
         /// Optional callback — invoked by SaveRO so MainViewModel can

@@ -12,6 +12,7 @@ namespace BayBrain.ViewModels
         private readonly UrgencyService _urgency = new();
         private readonly ScriptGeneratorService _scriptGen = new();
         private readonly ScriptPrintService _printService = new();
+        private readonly AuthService _auth;
 
         // ── Navigation ──────────────────────────────────────────────────
         [ObservableProperty] private int _selectedTabIndex = 0;
@@ -46,9 +47,18 @@ namespace BayBrain.ViewModels
         // ── Status bar ──────────────────────────────────────────────────
         [ObservableProperty] private string _statusMessage = string.Empty;
         [ObservableProperty] private bool _hasStatus = false;
-        [ObservableProperty] private bool _isAdminUnlocked = false;
-        [ObservableProperty] private string _adminPinEntry = string.Empty;
-        [ObservableProperty] private string _adminUnlockMessage = "Enter admin PIN to access Settings.";
+
+        // ── Local session / access control ───────────────────────────────
+        [ObservableProperty] private ObservableCollection<UserAccount> _loginUsers = new();
+        [ObservableProperty] private UserAccount? _selectedLoginUser;
+        [ObservableProperty] private string _loginPin = string.Empty;
+        [ObservableProperty] private string _loginMessage = "Select your user and enter your PIN.";
+        [ObservableProperty] private UserAccount? _currentUser;
+
+        public bool IsLoggedIn => CurrentUser != null;
+        public bool CanAccessSettings => CurrentUser?.CanAccessSettings == true;
+        public string CurrentUserDisplayName => CurrentUser?.DisplayName ?? "Not signed in";
+        public string CurrentUserRoleLabel => CurrentUser?.RoleLabel ?? "Locked";
 
         // Loaded data kept for Dashboard refresh
         private List<RepairOrder> _allOrders = new();
@@ -64,9 +74,14 @@ namespace BayBrain.ViewModels
 
             _appSettings = DataLoaderService.LoadSettings();
             _allOrders   = DataLoaderService.LoadRepairOrders();
+            _auth = new AuthService();
+            RefreshLoginUsers();
 
             // ── Profiles ──────────────────────────────────────────────
             _advisorProfiles = new AdvisorProfileViewModel();
+            _advisorProfiles.CanActivateProfile = profile =>
+                CurrentUser?.CanAccessSettings == true || CurrentUser?.AdvisorProfileId == profile.Id;
+            _advisorProfiles.ActivationDenied = ShowStatus;
             _advisorProfiles.ActiveAdvisorChanged = profile =>
             {
                 RoMode.SetAdvisor(profile);
@@ -85,8 +100,8 @@ namespace BayBrain.ViewModels
             _roMode = new ROViewModel(_search, _urgency);
             _roMode.OnROSaved = order =>
             {
-                _allOrders.Add(order);
-                DataLoaderService.SaveRepairOrders(_allOrders);
+                if (_allOrders.All(o => o.Id != order.Id))
+                    _allOrders.Insert(0, order);
                 History.Load(_allOrders);
                 RefreshDashboard();
             };
@@ -137,6 +152,14 @@ namespace BayBrain.ViewModels
             if (value == null) return;
             CurrentUrgency  = _urgency.Calculate(value, MilesOverdue, HasSymptoms);
             GeneratedScript = _scriptGen.Generate(value, CurrentUrgency, CustomerName, HasSymptoms);
+        }
+
+        partial void OnCurrentUserChanged(UserAccount? value)
+        {
+            OnPropertyChanged(nameof(IsLoggedIn));
+            OnPropertyChanged(nameof(CanAccessSettings));
+            OnPropertyChanged(nameof(CurrentUserDisplayName));
+            OnPropertyChanged(nameof(CurrentUserRoleLabel));
         }
 
         partial void OnMilesOverdueChanged(int value)   => RefreshUrgencyAndScript();
@@ -243,32 +266,82 @@ namespace BayBrain.ViewModels
         {
             if (int.TryParse(tabIndex, out int idx))
             {
-                SelectedTabIndex = idx;
-                if (idx == 7 && !IsAdminUnlocked)
+                if (!IsLoggedIn)
                 {
-                    AdminUnlockMessage = "Enter admin PIN to access Settings.";
+                    ShowStatus("Sign in before using BayBrain.");
+                    return;
                 }
+
+                SelectedTabIndex = idx;
+                if (idx == 7 && !CanAccessSettings)
+                    ShowStatus("Settings are restricted to manager and admin users.");
             }
         }
 
         [RelayCommand]
-        private void UnlockAdmin()
+        private void Login()
         {
-            if (AdminPinEntry == _appSettings.AdminPin)
+            if (SelectedLoginUser == null)
             {
-                IsAdminUnlocked = true;
-                AdminPinEntry = string.Empty;
-                AdminUnlockMessage = "Admin access unlocked.";
+                LoginMessage = "Select a user first.";
+                return;
+            }
+
+            if (!_auth.VerifyPin(SelectedLoginUser, LoginPin))
+            {
+                LoginPin = string.Empty;
+                LoginMessage = "Incorrect PIN.";
+                return;
+            }
+
+            CurrentUser = SelectedLoginUser;
+            LoginPin = string.Empty;
+            LoginMessage = $"Signed in as {CurrentUser.DisplayName}.";
+            _auth.RecordLogin(CurrentUser);
+            ApplyCurrentUserAdvisor();
+
+            if (CanAccessSettings)
+            {
                 Settings.RefreshStats(
                     _allOrders.Count,
                     AdvisorProfiles.Profiles.Count,
                     _search.GetAllServices().Count,
                     DataLoaderService.LoadQuiz().Count);
+            }
+        }
+
+        [RelayCommand]
+        private void Logout()
+        {
+            CurrentUser = null;
+            AdvisorProfiles.SetActiveAdvisorById(null);
+            SelectedTabIndex = 0;
+            RefreshLoginUsers();
+            LoginMessage = "Select your user and enter your PIN.";
+            ShowStatus("Signed out.");
+        }
+
+        private void RefreshLoginUsers()
+        {
+            _auth.Load();
+            LoginUsers = new ObservableCollection<UserAccount>(_auth.Users.Where(u => u.IsActive).OrderBy(u => u.DisplayName));
+            SelectedLoginUser = LoginUsers.FirstOrDefault(u => u.Role == UserRole.Admin) ?? LoginUsers.FirstOrDefault();
+        }
+
+        private void ApplyCurrentUserAdvisor()
+        {
+            if (CurrentUser == null)
+            {
+                AdvisorProfiles.SetActiveAdvisorById(null);
                 return;
             }
 
-            AdminPinEntry = string.Empty;
-            AdminUnlockMessage = "Incorrect PIN. Default is 0000 until changed in settings.json.";
+            if (CurrentUser.Role == UserRole.Advisor)
+            {
+                AdvisorProfiles.SetActiveAdvisorById(CurrentUser.AdvisorProfileId);
+                if (AdvisorProfiles.ActiveAdvisor == null)
+                    ShowStatus("This advisor login is not linked to an advisor profile yet.");
+            }
         }
 
         // ── Status message (auto-clears after 4 s) ─────────────────────

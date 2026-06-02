@@ -145,19 +145,122 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="Admin PIN" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
-                            <TextBox Style="{StaticResource FieldBox}"
-                                     Text="{Binding AdminPin, UpdateSourceTrigger=PropertyChanged}"
-                                     MaxLength="12"
-                                     ToolTip="Controls access to the Settings tab. Default is 0000."/>
+                            <TextBlock Text="Access Model" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                            <TextBlock Text="Settings are controlled by user roles, not advisor profile selection."
+                                       TextWrapping="Wrap"
+                                       Foreground="#EBEBF5"
+                                       FontSize="13"/>
                         </StackPanel>
                         <TextBlock Grid.Column="2"
-                                   Text="Settings access is a local convenience lock, not full user authentication."
+                                   Text="Admin and Manager accounts can change app settings. Advisor accounts stay tied to their assigned advisor profile."
                                    TextWrapping="Wrap"
                                    Foreground="#636366"
                                    FontSize="12"
                                    VerticalAlignment="Bottom"/>
                     </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Account Management ──────────────────────────────────── -->
+            <Border Style="{StaticResource SettingCard}">
+                <StackPanel>
+                    <TextBlock Text="🔐  ACCOUNT MANAGEMENT" Style="{StaticResource SectionLabel}"/>
+
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Username" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                            <TextBox Style="{StaticResource FieldBox}"
+                                     Text="{Binding NewUsername, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Display Name" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                            <TextBox Style="{StaticResource FieldBox}"
+                                     Text="{Binding NewDisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Role" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding RoleOptions}"
+                                      SelectedItem="{Binding NewUserRole}"
+                                      Height="38"
+                                      FontSize="13"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Linked Advisor Profile" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding AdvisorProfileOptions}"
+                                      SelectedItem="{Binding SelectedAdvisorForUser}"
+                                      DisplayMemberPath="Name"
+                                      Height="38"
+                                      FontSize="13"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="PIN" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
+                            <TextBox Style="{StaticResource FieldBox}"
+                                     Text="{Binding NewUserPin, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="12"
+                                     HorizontalContentAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button Content="Create User"
+                            Style="{StaticResource PrimaryBtn}"
+                            Command="{Binding CreateUserCommand}"
+                            HorizontalAlignment="Left"
+                            Margin="0,0,0,18"/>
+
+                    <ItemsControl ItemsSource="{Binding Users}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#1C1C1E" CornerRadius="8" Padding="12,10" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                                                <TextBlock Text="{Binding RoleLabel, StringFormat='  ·  {0}'}"
+                                                           FontSize="12"
+                                                           Foreground="#64D2FF"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Username, StringFormat='@{0}'}"
+                                                       FontSize="12"
+                                                       Foreground="#8E8E93"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="INACTIVE"
+                                                       Foreground="#FF453A"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Margin="0,0,10,0"
+                                                       Visibility="{Binding IsActive, Converter={StaticResource BoolVis}, ConverterParameter=invert}"/>
+                                            <Button Content="Deactivate"
+                                                    Style="{StaticResource DangerBtn}"
+                                                    Command="{Binding DataContext.DeactivateUserCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="{Binding IsActive, Converter={StaticResource BoolVis}}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </Border>
 
@@ -238,7 +341,7 @@
             <Border Style="{StaticResource SettingCard}">
                 <StackPanel>
                     <TextBlock Text="📊  DATA SUMMARY" Style="{StaticResource SectionLabel}"/>
-                    <UniformGrid Columns="4">
+                    <UniformGrid Columns="5">
                         <Border Background="#1C1C1E" CornerRadius="8" Padding="14,12" Margin="0,0,6,0">
                             <StackPanel>
                                 <TextBlock Text="{Binding ROCount}" FontSize="24" FontWeight="Bold"
@@ -268,6 +371,14 @@
                                 <TextBlock Text="{Binding QuizCount}" FontSize="24" FontWeight="Bold"
                                            Foreground="#BF5AF2" HorizontalAlignment="Center"/>
                                 <TextBlock Text="Quiz Questions" FontSize="11" Foreground="#8E8E93"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#1C1C1E" CornerRadius="8" Padding="14,12" Margin="6,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="{Binding UserCount}" FontSize="24" FontWeight="Bold"
+                                           Foreground="#64D2FF" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Users" FontSize="11" Foreground="#8E8E93"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>

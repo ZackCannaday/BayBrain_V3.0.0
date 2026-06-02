@@ -43,7 +43,10 @@ BayBrain is a .NET 8 WPF desktop app. The fastest places to customize it are:
   - Quiz flow and scoring.
 
 - `ViewModels/AdvisorProfileViewModel.cs`
-  - Profiles, XP, levels, leaderboard, active advisor.
+  - Advisor training profiles, leaderboard, and guarded active-advisor selection.
+
+- `Services/AuthService.cs`
+  - Local user accounts, roles, PIN hashing, and first-run admin bootstrap.
 
 ## Editable Data
 
@@ -53,7 +56,32 @@ BayBrain is a .NET 8 WPF desktop app. The fastest places to customize it are:
 - `Data/quiz.json`
   - Quiz questions, answers, explanations, difficulty, categories.
 
-After editing JSON, rebuild or rerun the app. The files are copied to `bin/Debug/net8.0-windows/Data`.
+Runtime files are created beside the executable:
+
+- `users.json`
+  - Local login accounts. First run creates `admin` / PIN `0000`.
+  - Roles: `Admin`, `Manager`, `Advisor`.
+
+- `advisor_profiles.json`
+  - Advisor training profiles and quiz history. Advisor user accounts can be linked to these profiles in Settings.
+
+- `repair_orders.json`
+  - Saved repair orders and recommendation approval history.
+
+- `settings.json`
+  - Dealership name, behavior defaults, export folder, and app preferences.
+
+After editing JSON, rerun the app. Catalog files are copied to `bin/Debug/net8.0-windows/Data`; runtime files are written to `bin/Debug/net8.0-windows`.
+
+## First Login
+
+On a fresh install, BayBrain creates one local admin account:
+
+- User: `Administrator`
+- Username: `admin`
+- PIN: `0000`
+
+Use Settings → Account Management to create manager/advisor accounts. Advisor accounts should be linked to an advisor profile so quiz sessions and ROs attach to the right person.
 
 ## Build And Run
 
@@ -71,4 +99,3 @@ C:\Users\zackc\OneDrive\Desktop\BayBrain\bin\Debug\net8.0-windows\BayBrain.exe
 ## Git Hygiene
 
 `bin/` and `obj/` are generated build folders and are ignored by Git. Commit source files, XAML, project files, and JSON data.
-

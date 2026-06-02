@@ -47,6 +47,14 @@ namespace BayBrain.Services
         public static bool SaveProfiles(List<AdvisorProfile> profiles)
             => Save("advisor_profiles.json", profiles);
 
+        // ── Local Users ─────────────────────────────────────────────────
+
+        public static List<UserAccount> LoadUsers()
+            => Load<List<UserAccount>>("users.json") ?? new();
+
+        public static bool SaveUsers(List<UserAccount> users)
+            => Save("users.json", users);
+
         // ── Repair Orders ────────────────────────────────────────────────
 
         public static List<RepairOrder> LoadRepairOrders()

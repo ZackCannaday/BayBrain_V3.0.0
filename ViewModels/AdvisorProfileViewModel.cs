@@ -22,6 +22,8 @@ namespace BayBrain.ViewModels
         [ObservableProperty] private ObservableCollection<SessionHistoryRow> _sessionHistory = new();
 
         public Action<AdvisorProfile?>? ActiveAdvisorChanged { get; set; }
+        public Func<AdvisorProfile, bool>? CanActivateProfile { get; set; }
+        public Action<string>? ActivationDenied { get; set; }
 
         public static readonly string[] AvatarColors =
         {
@@ -142,10 +144,27 @@ namespace BayBrain.ViewModels
         private void ActivateAdvisor(AdvisorProfile? profile)
         {
             if (profile == null) return;
+            if (CanActivateProfile != null && !CanActivateProfile(profile))
+            {
+                ActivationDenied?.Invoke("Only admins/managers can switch advisors. Advisor users stay tied to their login account.");
+                return;
+            }
+
             ActiveAdvisor = profile;
             SelectedProfile = profile;
             profile.LastActiveAt = DateTime.Now;
             DataLoaderService.SaveProfiles(_allProfiles);
+            ActiveAdvisorChanged?.Invoke(profile);
+        }
+
+        public AdvisorProfile? FindProfileById(string? id)
+            => string.IsNullOrWhiteSpace(id) ? null : _allProfiles.FirstOrDefault(p => p.Id == id);
+
+        public void SetActiveAdvisorById(string? id)
+        {
+            var profile = FindProfileById(id);
+            ActiveAdvisor = profile;
+            SelectedProfile = profile;
             ActiveAdvisorChanged?.Invoke(profile);
         }
 
