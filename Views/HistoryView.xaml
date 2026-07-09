@@ -214,7 +214,7 @@
                                                                Foreground="#636366"
                                                                Visibility="{Binding HasCustomer, Converter={StaticResource InvBoolVis}}"/>
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1" Text="{Binding MileageLabel}"
+                                                <TextBlock Grid.Column="1" Text="{Binding MileageLabel, Mode=OneWay}"
                                                            FontSize="12" Foreground="#8E8E93"/>
                                             </Grid>
 
@@ -294,7 +294,7 @@
                             <Border Background="#1C1C1E" CornerRadius="8" Padding="12" Margin="6,0,0,6">
                                 <StackPanel>
                                     <TextBlock Text="MILEAGE" FontSize="10" Foreground="#636366"/>
-                                    <TextBlock Text="{Binding SelectedOrder.MileageLabel}"
+                                    <TextBlock Text="{Binding SelectedOrder.MileageLabel, Mode=OneWay}"
                                                FontSize="13" Foreground="#FFFFFF" Margin="0,3,0,0"/>
                                     <TextBlock Text="{Binding SelectedOrder.DateLabel}"
                                                FontSize="12" Foreground="#8E8E93"/>

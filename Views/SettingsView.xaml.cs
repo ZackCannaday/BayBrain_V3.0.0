@@ -8,5 +8,13 @@ namespace BayBrain.Views
         {
             InitializeComponent();
         }
+
+        private void NewUserPinBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.SettingsViewModel vm)
+            {
+                vm.NewUserPin = NewUserPinBox.Password;
+            }
+        }
     }
 }

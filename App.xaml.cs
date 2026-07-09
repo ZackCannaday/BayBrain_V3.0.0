@@ -3,6 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using BayBrain.Services;
+using BayBrain.ViewModels;
 
 namespace BayBrain
 {
@@ -11,14 +14,33 @@ namespace BayBrain
         private static string _lastDispatcherError = string.Empty;
         private static DateTime _lastDispatcherErrorShownAt = DateTime.MinValue;
 
+        public static IServiceProvider Services { get; private set; } = null!;
+
         protected override void OnStartup(StartupEventArgs e)
         {
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            Services = services.BuildServiceProvider();
+
             // Register global exception handlers
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
             base.OnStartup(e);
+        }
+
+        private void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<AuthService>();
+            
+            services.AddSingleton<SearchService>(provider => 
+            {
+                var serviceItems = DataLoaderService.LoadServices();
+                return new SearchService(serviceItems);
+            });
+
+            services.AddSingleton<MainViewModel>();
         }
 
         private void App_DispatcherUnhandledException(object? sender, DispatcherUnhandledExceptionEventArgs e)

@@ -4,9 +4,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 
+using System.ComponentModel.DataAnnotations;
+
 namespace BayBrain.ViewModels
 {
-    public partial class MainViewModel : ObservableObject
+    public partial class MainViewModel : ObservableValidator
     {
         private readonly SearchService _search;
         private readonly UrgencyService _urgency = new();
@@ -28,9 +30,19 @@ namespace BayBrain.ViewModels
         // ── Service Detail ───────────────────────────────────────────────
         [ObservableProperty] private UrgencyScore? _currentUrgency;
         [ObservableProperty] private string _generatedScript = string.Empty;
-        [ObservableProperty] private string _customerName = string.Empty;
+
+        [Required(ErrorMessage = "Customer name is required")]
+        [MinLength(2, ErrorMessage = "Name must be at least 2 characters")]
+        [ObservableProperty]
+        [NotifyDataErrorInfo]
+        private string _customerName = string.Empty;
+
         [ObservableProperty] private bool _hasSymptoms = false;
-        [ObservableProperty] private int _milesOverdue = 0;
+
+        [Range(0, 500000, ErrorMessage = "Mileage must be a valid number")]
+        [ObservableProperty]
+        [NotifyDataErrorInfo]
+        private int _milesOverdue = 0;
 
         // ── Categories ──────────────────────────────────────────────────
         [ObservableProperty] private ObservableCollection<string> _categories = new();
@@ -67,14 +79,13 @@ namespace BayBrain.ViewModels
         // ── Convenience aliases for XAML bindings ──────────────────────────
         public ROViewModel RO => RoMode;
 
-        public MainViewModel()
+        public MainViewModel(AuthService auth, SearchService search)
         {
-            var services = DataLoaderService.LoadServices();
-            _search = new SearchService(services);
+            _auth = auth;
+            _search = search;
 
             _appSettings = DataLoaderService.LoadSettings();
             _allOrders   = DataLoaderService.LoadRepairOrders();
-            _auth = new AuthService();
             RefreshLoginUsers();
 
             // ── Profiles ──────────────────────────────────────────────
@@ -100,8 +111,12 @@ namespace BayBrain.ViewModels
             _roMode = new ROViewModel(_search, _urgency);
             _roMode.OnROSaved = order =>
             {
-                if (_allOrders.All(o => o.Id != order.Id))
+                var existingIndex = _allOrders.FindIndex(o => o.Id == order.Id);
+                if (existingIndex < 0)
                     _allOrders.Insert(0, order);
+                else
+                    _allOrders[existingIndex] = order;
+
                 History.Load(_allOrders);
                 RefreshDashboard();
             };
@@ -112,7 +127,7 @@ namespace BayBrain.ViewModels
             _settings.RefreshStats(
                 _allOrders.Count,
                 _advisorProfiles.Profiles.Count,
-                services.Count,
+                _search.Search("").Count,
                 DataLoaderService.LoadQuiz().Count);
 
             // ── Dashboard ─────────────────────────────────────────────
@@ -166,11 +181,11 @@ namespace BayBrain.ViewModels
         partial void OnHasSymptomsChanged(bool value)   => RefreshUrgencyAndScript();
         partial void OnCustomerNameChanged(string value) => RefreshUrgencyAndScript();
 
-        // When the tab switches TO the Dashboard (index 5) refresh it
+        // When the tab switches TO the Dashboard (index 4) refresh it
         partial void OnSelectedTabIndexChanged(int value)
         {
-            if (value == 5) RefreshDashboard();
-            if (value == 7)  // Settings tab
+            if (value == 4) RefreshDashboard();
+            if (value == 6)  // Settings tab
             {
                 Settings.RefreshStats(
                     _allOrders.Count,
@@ -212,7 +227,11 @@ namespace BayBrain.ViewModels
         }
 
         [RelayCommand]
-        private void SelectService(ServiceItem? item) => SelectedService = item;
+        private void SelectService(ServiceItem? item)
+        {
+            SelectedService = item;
+            if (item != null) SelectedTabIndex = 0;
+        }
 
         [RelayCommand]
         private void ClearSearch()
@@ -258,7 +277,7 @@ namespace BayBrain.ViewModels
         private void StartQuiz()
         {
             Quiz.StartNewSession();
-            SelectedTabIndex = 3; // Quiz is now tab 3
+            SelectedTabIndex = 2; // Quiz is now tab 2
         }
 
         [RelayCommand]
@@ -273,11 +292,12 @@ namespace BayBrain.ViewModels
                 }
 
                 SelectedTabIndex = idx;
-                if (idx == 7 && !CanAccessSettings)
-                    ShowStatus("Settings are restricted to manager and admin users.");
+                if (idx == 6 && !CanAccessSettings)
+                {
+                    ShowStatus("Admin privileges required for Settings.");
+                }
             }
-        }
-
+        } 
         [RelayCommand]
         private void Login()
         {

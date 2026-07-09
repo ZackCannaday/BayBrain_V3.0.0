@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace BayBrain.Views
 {
-    public partial class ServiceBrowserView : UserControl
+    public partial class SearchView : UserControl
     {
-        public ServiceBrowserView()
+        public SearchView()
         {
             InitializeComponent();
         }

@@ -7,8 +7,6 @@
         <conv:BoolToVisibilityConverter x:Key="BoolVis"/>
         <conv:NullToVisibilityConverter x:Key="NullVis"/>
         <conv:StringNotEmptyConverter   x:Key="StrVis"/>
-
-        <!-- Urgency pill color by hex string -->
         <conv:HexStringToBrushConverter x:Key="HexBrush"/>
 
         <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
@@ -49,12 +47,13 @@
             </Setter>
         </Style>
 
-        <Style x:Key="RecCardStyle" TargetType="Border">
+        <Style x:Key="ServiceRowStyle" TargetType="Border">
             <Setter Property="Background" Value="#FF1C1C1E"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="BorderBrush" Value="#FF2C2C2E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,12"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
-            <Setter Property="Cursor" Value="Hand"/>
         </Style>
     </UserControl.Resources>
 
@@ -65,34 +64,33 @@
         </Grid.ColumnDefinitions>
 
         <!-- ══════════════════════════════════════════════════
-             LEFT — Vehicle Input Form
+             LEFT — Vehicle Input Form (Order Config)
              ══════════════════════════════════════════════════ -->
-        <Border Grid.Column="0" Background="#FF1C1C1E"
-                BorderBrush="#FF38383A" BorderThickness="0,0,1,0">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="18,18,18,18">
+        <Border Grid.Column="0" Background="#FF131314"
+                BorderBrush="#FF2C2C2E" BorderThickness="0,0,1,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="False" Padding="24,24,24,24">
                 <StackPanel>
 
                     <!-- Header -->
-                    <TextBlock Text="RO MODE" Foreground="#FF636366" FontSize="10"
+                    <TextBlock Text="ORDER CONFIG" Foreground="#FF636366" FontSize="11"
                                FontWeight="SemiBold" Margin="0,0,0,4"/>
                     <TextBlock Text="Repair Order Analyzer"
-                               FontSize="20" FontWeight="Bold" Foreground="White"
+                               FontSize="22" FontWeight="Bold" Foreground="White"
                                Margin="0,0,0,4"/>
                     <TextBlock FontSize="12" Foreground="#FF0A84FF" Margin="0,0,0,4"
                                Visibility="{Binding RO.AdvisorName, Converter={StaticResource StrVis}}">
                         <Run Text="Active advisor: "/>
                         <Run Text="{Binding RO.AdvisorName}"/>
                     </TextBlock>
-                    <TextBlock Text="Enter vehicle info to instantly see all due services."
-                               FontSize="12" Foreground="#FF8E8E93" TextWrapping="Wrap"
-                               Margin="0,0,0,20"/>
+                    <TextBlock Text="Enter vehicle details to generate a customized service plan."
+                               FontSize="13" Foreground="#FF8E8E93" TextWrapping="Wrap"
+                               Margin="0,0,0,24"/>
 
                     <!-- ── Vehicle Section ──────────────────────── -->
                     <TextBlock Text="VEHICLE" Style="{StaticResource FieldLabelStyle}"
                                Margin="0,0,0,10"/>
 
-                    <!-- Year / Make / Model row -->
-                    <Grid Margin="0,0,0,10">
+                    <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="90"/>
                             <ColumnDefinition Width="8"/>
@@ -100,109 +98,88 @@
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Year" Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox ItemsSource="{Binding RO.YearOptions}"
                                       SelectedItem="{Binding RO.VehicleYear}"
-                                      MaxDropDownHeight="260"/>
+                                      MaxDropDownHeight="260" Height="36" FontSize="13"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Make" Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox ItemsSource="{Binding RO.MakeOptions}"
                                       SelectedItem="{Binding RO.VehicleMake, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      MaxDropDownHeight="260"/>
+                                      MaxDropDownHeight="260" Height="36" FontSize="13"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="4">
                             <TextBlock Text="Model" Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox ItemsSource="{Binding RO.ModelOptions}"
                                       SelectedItem="{Binding RO.VehicleModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsEnabled="{Binding RO.HasSelectedMake}"
-                                      MaxDropDownHeight="260"/>
+                                      MaxDropDownHeight="260" Height="36" FontSize="13"/>
                         </StackPanel>
                     </Grid>
 
-                    <!-- Mileage -->
-                    <StackPanel Margin="0,0,0,10">
-                        <TextBlock Text="Current Mileage *" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox Style="{StaticResource FieldBoxStyle}"
-                                 FontSize="15" FontWeight="SemiBold"
-                                 PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
-                                 DataObject.Pasting="NumberOnlyTextBox_Pasting">
-                            <TextBox.Text>
-                                <Binding Path="RO.VehicleMileage"
-                                         UpdateSourceTrigger="LostFocus"
-                                         StringFormat="{}{0:N0}"/>
-                            </TextBox.Text>
-                        </TextBox>
-                    </StackPanel>
+                    <!-- Mileage (Slider + TextBox) -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0" VerticalAlignment="Bottom">
+                            <TextBlock Text="Current Mileage *" Style="{StaticResource FieldLabelStyle}"/>
+                            <Slider Minimum="0" Maximum="300000" Value="{Binding RO.VehicleMileage}" 
+                                    TickFrequency="500" IsSnapToTickEnabled="False" Margin="0,8,0,4"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text=" " Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBox Style="{StaticResource FieldBoxStyle}"
+                                     FontSize="15" FontWeight="SemiBold"
+                                     HorizontalContentAlignment="Center"
+                                     PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                     DataObject.Pasting="NumberOnlyTextBox_Pasting">
+                                <TextBox.Text>
+                                    <Binding Path="RO.VehicleMileage"
+                                             UpdateSourceTrigger="PropertyChanged"
+                                             StringFormat="{}{0:N0}"/>
+                                </TextBox.Text>
+                            </TextBox>
+                        </StackPanel>
+                    </Grid>
 
-                    <!-- VIN (optional) -->
-                    <StackPanel Margin="0,0,0,18">
+                    <!-- VIN -->
+                    <StackPanel Margin="0,0,0,24">
                         <TextBlock Text="VIN (optional)" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding RO.VehicleVin, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FieldBoxStyle}"
                                  MaxLength="17"/>
                     </StackPanel>
 
-                    <Rectangle Height="1" Fill="#FF38383A" Margin="0,0,0,18"/>
+                    <Rectangle Height="1" Fill="#FF2C2C2E" Margin="0,0,0,24"/>
 
                     <!-- ── Customer Section ─────────────────────── -->
-                    <TextBlock Text="CUSTOMER" Style="{StaticResource FieldLabelStyle}"
-                               Margin="0,0,0,10"/>
-
-                    <StackPanel Margin="0,0,0,10">
+                    <TextBlock Text="CUSTOMER" Style="{StaticResource FieldLabelStyle}" Margin="0,0,0,10"/>
+                    <StackPanel Margin="0,0,0,14">
                         <TextBlock Text="Name" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding RO.CustomerName, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FieldBoxStyle}"/>
                     </StackPanel>
-
-                    <StackPanel Margin="0,0,0,18">
+                    <StackPanel Margin="0,0,0,24">
                         <TextBlock Text="Phone" Style="{StaticResource FieldLabelStyle}"/>
                         <TextBox Text="{Binding RO.CustomerPhone, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FieldBoxStyle}"/>
                     </StackPanel>
 
-                    <Rectangle Height="1" Fill="#FF38383A" Margin="0,0,0,18"/>
+                    <Rectangle Height="1" Fill="#FF2C2C2E" Margin="0,0,0,24"/>
 
-                    <!-- ── Oil Change Section ───────────────────── -->
-                    <TextBlock Text="LAST OIL CHANGE" Style="{StaticResource FieldLabelStyle}"
-                               Margin="0,0,0,10"/>
-
-                    <CheckBox Content="I know the last oil change mileage"
-                              IsChecked="{Binding RO.HasLastOilMileage}"
-                              Foreground="White" FontSize="13" Margin="0,0,0,10"/>
-
-                    <StackPanel Visibility="{Binding RO.HasLastOilMileage, Converter={StaticResource BoolVis}}"
-                                Margin="0,0,0,18">
-                        <TextBlock Text="Mileage at last oil change"
-                                   Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox Style="{StaticResource FieldBoxStyle}"
-                                 PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
-                                 DataObject.Pasting="NumberOnlyTextBox_Pasting">
-                            <TextBox.Text>
-                                <Binding Path="RO.LastOilChangeMileage"
-                                         UpdateSourceTrigger="LostFocus"/>
-                            </TextBox.Text>
-                        </TextBox>
-                    </StackPanel>
-
-                    <Rectangle Height="1" Fill="#FF38383A" Margin="0,0,0,18"/>
-
-                    <!-- ── Analyze Button ────────────────────────── -->
+                    <!-- ── Action Buttons ────────────────────────── -->
                     <Button Command="{Binding RO.AnalyzeCommand}"
-                            Height="46" Cursor="Hand">
+                            Height="46" Cursor="Hand" Margin="0,0,0,12">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bd" Background="#FF0A84FF"
-                                        CornerRadius="12">
-                                    <TextBlock Text="⚡  Analyze Vehicle"
-                                               FontSize="15" FontWeight="Bold"
-                                               Foreground="White"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
+                                <Border x:Name="Bd" Background="#FF0A84FF" CornerRadius="8">
+                                    <TextBlock Text="⚡ Generate Service Plan"
+                                               FontSize="15" FontWeight="Bold" Foreground="White"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
@@ -216,110 +193,79 @@
                         </Button.Template>
                     </Button>
 
-                    <Button Content="↺  Reset Form"
+                    <Button Content="Reset Configuration"
                             Command="{Binding RO.ResetCommand}"
                             Background="Transparent" Foreground="#FF636366"
-                            BorderThickness="0" FontSize="12"
-                            Cursor="Hand" Margin="0,10,0,0"
+                            BorderThickness="0" FontSize="13" Cursor="Hand"
                             HorizontalAlignment="Center"/>
 
-                    <Border Background="#FF2C2C2E" CornerRadius="8" Padding="10,8" Margin="0,10,0,0"
+                    <Border Background="#FF2C2C2E" CornerRadius="8" Padding="12,10" Margin="0,16,0,0"
                             Visibility="{Binding RO.HasSaveStatus, Converter={StaticResource BoolVis}}">
                         <TextBlock Text="{Binding RO.SaveStatusMessage}"
-                                   Foreground="#FF8E8E93"
-                                   FontSize="12"
-                                   TextWrapping="Wrap"/>
+                                   Foreground="#FF8E8E93" FontSize="12" TextWrapping="Wrap" TextAlignment="Center"/>
                     </Border>
-
-                    <Rectangle Height="1" Fill="#FF38383A" Margin="0,18"/>
-
-                    <!-- ── Recent ROs ────────────────────────────── -->
-                    <TextBlock Text="RECENT REPAIR ORDERS" Style="{StaticResource FieldLabelStyle}"
-                               Margin="0,0,0,10"/>
-
-                    <StackPanel Visibility="{Binding RO.HasRecentOrders, Converter={StaticResource BoolVis}, ConverterParameter=invert}">
+                    
+                    <!-- Recent ROs simplified -->
+                    <StackPanel Margin="0,32,0,0">
+                        <TextBlock Text="RECENT REPAIR ORDERS" Style="{StaticResource FieldLabelStyle}" Margin="0,0,0,10"/>
                         <TextBlock Text="No saved ROs yet." FontSize="12"
                                    Foreground="#FF636366" HorizontalAlignment="Center"
-                                   Margin="0,8,0,0"/>
+                                   Visibility="{Binding RO.HasRecentOrders, Converter={StaticResource BoolVis}, ConverterParameter=invert}"/>
+                        <ItemsControl ItemsSource="{Binding RO.RecentOrders}"
+                                      Visibility="{Binding RO.HasRecentOrders, Converter={StaticResource BoolVis}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FF1C1C1E" CornerRadius="8" Padding="12,10" Margin="0,0,0,6" Cursor="Hand" BorderBrush="#FF2C2C2E" BorderThickness="1">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding DataContext.RO.LoadRecentOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                          CommandParameter="{Binding}"/>
+                                        </Border.InputBindings>
+                                        <Grid>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding VehicleLabel}" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                                                <TextBlock FontSize="11" Foreground="#FF8E8E93" Margin="0,2,0,0">
+                                                    <Run Text="{Binding CustomerName}"/>
+                                                    <Run Text="  ·  "/>
+                                                    <Run Text="{Binding MileageLabel, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Right">
+                                                    <Run Text="{Binding ApprovedCount, Mode=OneWay}"/>
+                                                    <Run Text="/" Foreground="#FF636366"/>
+                                                    <Run Text="{Binding RecommendedCount, Mode=OneWay}" Foreground="#FF636366"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
-
-                    <ItemsControl ItemsSource="{Binding RO.RecentOrders}"
-                                  Visibility="{Binding RO.HasRecentOrders, Converter={StaticResource BoolVis}}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#FF2C2C2E" CornerRadius="10"
-                                        Padding="12,10" Margin="0,0,0,6"
-                                        Cursor="Hand">
-                                    <Border.InputBindings>
-                                        <MouseBinding MouseAction="LeftClick"
-                                                      Command="{Binding DataContext.RO.LoadRecentOrderCommand,
-                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                      CommandParameter="{Binding}"/>
-                                    </Border.InputBindings>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding VehicleLabel}"
-                                                       FontSize="13" FontWeight="SemiBold"
-                                                       Foreground="White"/>
-                                            <TextBlock FontSize="11" Foreground="#FF8E8E93"
-                                                       Margin="0,2,0,0">
-                                                <Run Text="{Binding CustomerName}"/>
-                                                <Run Text="  ·  "/>
-                                                <Run Text="{Binding MileageLabel}"/>
-                                            </TextBlock>
-                                            <TextBlock FontSize="10" Foreground="#FF636366"
-                                                       Margin="0,2,0,0"
-                                                       Text="{Binding CreatedAt, StringFormat='MMM d, yyyy'}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center">
-                                            <TextBlock HorizontalAlignment="Right"
-                                                       FontSize="13" FontWeight="SemiBold"
-                                                       Foreground="White">
-                                                <Run Text="{Binding ApprovedCount}"/>
-                                                <Run Text="/" Foreground="#FF636366"/>
-                                                <Run Text="{Binding RecommendedCount}"
-                                                     Foreground="#FF636366"/>
-                                            </TextBlock>
-                                            <TextBlock Text="approved" FontSize="10"
-                                                       HorizontalAlignment="Right"
-                                                       Foreground="#FF636366"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
 
                 </StackPanel>
             </ScrollViewer>
         </Border>
 
         <!-- ══════════════════════════════════════════════════
-             RIGHT — Analysis Results
+             RIGHT — Cart / POS Checkout Layout
              ══════════════════════════════════════════════════ -->
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Background="#FF0D0D0F">
 
             <!-- Idle state -->
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                        MaxWidth="420"
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="360"
                         Visibility="{Binding RO.IsAnalyzed, Converter={StaticResource BoolVis}, ConverterParameter=invert}">
-                <TextBlock Text="🔧" FontSize="64" HorizontalAlignment="Center"/>
-                <TextBlock Text="Enter vehicle info and click Analyze"
-                           FontSize="16" Foreground="#FF8E8E93"
-                           HorizontalAlignment="Center" Margin="0,16,0,8"
-                           TextAlignment="Center"/>
-                <TextBlock Text="BayBrain will calculate every service that's due or overdue based on mileage — and score each one by urgency."
-                           FontSize="13" Foreground="#FF636366"
-                           HorizontalAlignment="Center" TextAlignment="Center"
-                           TextWrapping="Wrap" LineHeight="20"/>
+                <TextBlock Text="🛒" FontSize="64" HorizontalAlignment="Center" Opacity="0.5"/>
+                <TextBlock Text="Your Cart is Empty"
+                           FontSize="20" FontWeight="SemiBold" Foreground="#FFFFFFFF"
+                           HorizontalAlignment="Center" Margin="0,16,0,8" TextAlignment="Center"/>
+                <TextBlock Text="Configure a vehicle on the left and generate a service plan to review recommendations."
+                           FontSize="14" Foreground="#FF8E8E93"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" LineHeight="22"/>
             </StackPanel>
 
-            <!-- Results -->
+            <!-- Active POS state -->
             <Grid Visibility="{Binding RO.IsAnalyzed, Converter={StaticResource BoolVis}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -327,260 +273,179 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Summary header -->
-                <Border Grid.Row="0" Padding="24,18,24,0">
-                    <StackPanel>
-                        <!-- Vehicle title -->
-                        <Grid Margin="0,0,0,14">
-                            <StackPanel>
-                                <TextBlock FontSize="22" FontWeight="Bold" Foreground="White">
-                                    <Run Text="{Binding RO.VehicleYear}"/>
-                                    <Run Text=" "/>
-                                    <Run Text="{Binding RO.VehicleMake}"/>
-                                    <Run Text=" "/>
-                                    <Run Text="{Binding RO.VehicleModel}"/>
-                                </TextBlock>
-                                <TextBlock FontSize="13" Foreground="#FF8E8E93" Margin="0,3,0,0">
-                                    <Run Text="{Binding RO.VehicleMileage, StringFormat='{}{0:N0} miles'}"/>
-                                    <Run Text="  ·  "/>
-                                    <Run Text="{Binding RO.CustomerName}"/>
-                                </TextBlock>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                                        VerticalAlignment="Center">
-                                <Button Content="✓  Approve All"
-                                        Background="#FF30D158" Foreground="White"
-                                        FontWeight="SemiBold" FontSize="12"
-                                        BorderThickness="0" Height="34"
-                                        Padding="14,0" Cursor="Hand"
-                                        Command="{Binding RO.ApproveAllCommand}"
-                                        Margin="0,0,10,0">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                                                    CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                                <Button Content="💾  Save RO"
-                                        Background="#FF0A84FF" Foreground="White"
-                                        FontWeight="SemiBold" FontSize="12"
-                                        BorderThickness="0" Height="34"
-                                        Padding="14,0" Cursor="Hand"
-                                        Command="{Binding RO.SaveROCommand}">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                                                    CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
+                <!-- Top Header: Customer / Vehicle Summary -->
+                <Border Grid.Row="0" Background="#FF131314" BorderBrush="#FF2C2C2E" BorderThickness="0,0,0,1" Padding="32,24">
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,4">
+                                <Run Text="{Binding RO.VehicleYear}"/>
+                                <Run Text=" "/>
+                                <Run Text="{Binding RO.VehicleMake}"/>
+                                <Run Text=" "/>
+                                <Run Text="{Binding RO.VehicleModel}"/>
+                            </TextBlock>
+                            <TextBlock FontSize="14" Foreground="#FF8E8E93">
+                                <Run Text="Customer: "/>
+                                <Run Text="{Binding RO.CustomerName}" Foreground="White"/>
+                                <Run Text="  |  "/>
+                                <Run Text="Odometer: "/>
+                                <Run Text="{Binding RO.VehicleMileage, StringFormat='{}{0:N0} mi'}" Foreground="White"/>
+                            </TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <!-- Quick action: Approve all -->
+                            <Button Content="Approve All"
+                                    Command="{Binding RO.ApproveAllCommand}"
+                                    Background="#FF2C2C2E" Foreground="White"
+                                    BorderThickness="0" Padding="16,8" Cursor="Hand" Margin="0,0,12,0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Opacity" Value="0.8"/></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-                        <!-- Tier summary pills -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <Border Background="#FF3A1A1A" CornerRadius="10" Padding="12,6" Margin="0,0,8,0"
+                <!-- Middle: Sleek List of Services -->
+                <ScrollViewer Grid.Row="1" Padding="32,24" VerticalScrollBarVisibility="Auto" CanContentScroll="False">
+                    <StackPanel>
+                        <!-- Urgency Overview Pills -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                            <Border Background="#2B1515" BorderBrush="#5C1616" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,8,0"
                                     Visibility="{Binding RO.CriticalCount, Converter={StaticResource BoolVis}}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🔴 " FontSize="13"/>
-                                    <TextBlock FontSize="13" FontWeight="Bold" Foreground="#FFFF3B30">
-                                        <Run Text="{Binding RO.CriticalCount}"/>
-                                        <Run Text=" Critical"/>
-                                    </TextBlock>
-                                </StackPanel>
+                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#FF453A">
+                                    <Run Text="{Binding RO.CriticalCount, Mode=OneWay}"/>
+                                    <Run Text=" Critical"/>
+                                </TextBlock>
                             </Border>
-                            <Border Background="#FF3A2A0A" CornerRadius="10" Padding="12,6" Margin="0,0,8,0"
+                            <Border Background="#2E200C" BorderBrush="#5E3A11" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,8,0"
                                     Visibility="{Binding RO.HighCount, Converter={StaticResource BoolVis}}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🟠 " FontSize="13"/>
-                                    <TextBlock FontSize="13" FontWeight="Bold" Foreground="#FFFF9500">
-                                        <Run Text="{Binding RO.HighCount}"/>
-                                        <Run Text=" High"/>
-                                    </TextBlock>
-                                </StackPanel>
+                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#FF9F0A">
+                                    <Run Text="{Binding RO.HighCount, Mode=OneWay}"/>
+                                    <Run Text=" High Priority"/>
+                                </TextBlock>
                             </Border>
-                            <Border Background="#FF2C2C2E" CornerRadius="10" Padding="12,6" Margin="0,0,8,0"
+                            <Border Background="#2E290C" BorderBrush="#5E5311" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,8,0"
                                     Visibility="{Binding RO.MediumCount, Converter={StaticResource BoolVis}}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🟡 " FontSize="13"/>
-                                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#FFFFCC00">
-                                        <Run Text="{Binding RO.MediumCount}"/>
-                                        <Run Text=" Moderate"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="#FF2C2C2E" CornerRadius="10" Padding="12,6">
-                                <TextBlock FontSize="13" Foreground="#FF8E8E93">
-                                    <Run Text="{Binding RO.ApprovedCount}"/>
-                                    <Run Text="/"/>
-                                    <Run Text="{Binding RO.TotalRecommended}"/>
-                                    <Run Text=" approved"/>
+                                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#FFD60A">
+                                    <Run Text="{Binding RO.MediumCount, Mode=OneWay}"/>
+                                    <Run Text=" Suggested"/>
                                 </TextBlock>
                             </Border>
                         </StackPanel>
 
-                        <Rectangle Height="1" Fill="#FF38383A"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Recommendations list -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Service cards -->
-                    <ScrollViewer Grid.Column="0" Padding="24,14,12,24"
-                                  VerticalScrollBarVisibility="Auto">
+                        <!-- Items -->
                         <ItemsControl ItemsSource="{Binding RO.Recommendations}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource RecCardStyle}">
-                                        <Border.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick"
-                                                          Command="{Binding DataContext.RO.ToggleApprovalCommand,
-                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                          CommandParameter="{Binding}"/>
-                                        </Border.InputBindings>
+                                    <Border Style="{StaticResource ServiceRowStyle}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                            
+                                            <!-- Urgency indicator left bar -->
+                                            <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="0,0,16,0"
+                                                    Background="{Binding UrgencyColorHex, Converter={StaticResource HexBrush}}"/>
 
-                                                <!-- Name + urgency badge -->
-                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                                                    <TextBlock Text="{Binding ServiceName}"
-                                                               FontSize="14" FontWeight="SemiBold"
-                                                               Foreground="White"
-                                                               VerticalAlignment="Center"
-                                                               Margin="0,0,10,0"/>
-                                                    <Border CornerRadius="6" Padding="8,3"
-                                                            Background="{Binding UrgencyColorHex, Converter={StaticResource HexBrush}}">
-                                                        <TextBlock Text="{Binding UrgencyLabel}"
-                                                                   FontSize="10" FontWeight="Bold"
-                                                                   Foreground="White"/>
-                                                    </Border>
-                                                    <TextBlock Text="{Binding UrgencyScore}"
-                                                               FontSize="11" Foreground="#FF8E8E93"
-                                                               VerticalAlignment="Center"
-                                                               Margin="6,0,0,0">
-                                                        <Run Text="{Binding UrgencyScore}"/>
-                                                        <Run Text="/10"/>
-                                                    </TextBlock>
-                                                </StackPanel>
-
-                                                <!-- Category -->
-                                                <TextBlock Text="{Binding Category}"
-                                                           FontSize="11" Foreground="#FF0A84FF"
-                                                           FontWeight="SemiBold" Margin="0,0,0,4"/>
-
-                                                <!-- Reason -->
-                                                <TextBlock Text="{Binding Reason}"
-                                                           FontSize="12" Foreground="#FF8E8E93"
-                                                           TextWrapping="Wrap" MaxWidth="420"/>
+                                            <!-- Main details -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,16,0">
+                                                <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4">
+                                                    <Run Text="{Binding ServiceName}"/>
+                                                </TextBlock>
+                                                <TextBlock FontSize="12" Foreground="#FF8E8E93" TextWrapping="Wrap" MaxWidth="500">
+                                                    <Run Text="{Binding Category}" Foreground="#FF0A84FF" FontWeight="SemiBold"/>
+                                                    <Run Text=" • "/>
+                                                    <Run Text="{Binding Reason}"/>
+                                                </TextBlock>
                                             </StackPanel>
 
-                                            <!-- Right: price + status -->
-                                            <StackPanel Grid.Column="1" HorizontalAlignment="Right"
-                                                        VerticalAlignment="Center" MinWidth="90">
-                                                <TextBlock Text="{Binding PriceRange}"
-                                                           FontSize="13" FontWeight="SemiBold"
-                                                           Foreground="White"
-                                                           HorizontalAlignment="Right"
-                                                           Margin="0,0,0,6"/>
-                                                <Border CornerRadius="8" Padding="10,4"
-                                                        HorizontalAlignment="Right">
-                                                    <Border.Background>
-                                                        <SolidColorBrush Color="{Binding StatusColor}"/>
-                                                    </Border.Background>
-                                                    <TextBlock Text="{Binding Status}"
-                                                               FontSize="11" FontWeight="Bold"
-                                                               Foreground="White"/>
-                                                </Border>
+                                            <!-- Price Details -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,24,0" MinWidth="80">
+                                                <TextBlock Text="Estimated" FontSize="11" Foreground="#FF636366" HorizontalAlignment="Right" Margin="0,0,0,2"/>
+                                                <TextBlock Text="{Binding PriceRange}" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
                                             </StackPanel>
+
+                                            <!-- Action Toggle -->
+                                            <Button Grid.Column="3" Width="90" Height="36" Cursor="Hand" VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.RO.ToggleApprovalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="ToggleBd" CornerRadius="18" Padding="0" BorderThickness="1">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="#FF1C1C1E"/>
+                                                                    <Setter Property="BorderBrush" Value="#FF38383A"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Approved">
+                                                                            <Setter Property="Background" Value="#FF30D158"/>
+                                                                            <Setter Property="BorderBrush" Value="#FF30D158"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Declined">
+                                                                            <Setter Property="Background" Value="#FFFF3B30"/>
+                                                                            <Setter Property="BorderBrush" Value="#FFFF3B30"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock x:Name="ToggleText" FontSize="12" FontWeight="Bold" Foreground="White"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                       Text="{Binding Status}"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
+                    </StackPanel>
+                </ScrollViewer>
 
-                    <!-- Script panel for selected service -->
-                    <Border Grid.Column="1"
-                            Width="280"
-                            Background="#FF1C1C1E"
-                            BorderBrush="#FF38383A"
-                            BorderThickness="1,0,0,0"
-                            Padding="16"
-                            Visibility="{Binding RO.SelectedScript, Converter={StaticResource StrVis}}">
-                        <StackPanel>
-                            <TextBlock Text="QUICK SCRIPT" Foreground="#FF636366"
-                                       FontSize="10" FontWeight="SemiBold"
-                                       Margin="0,0,0,12"/>
-                            <TextBlock Text="{Binding RO.SelectedScript}"
-                                       FontSize="13" Foreground="#FFEBEBF5"
-                                       TextWrapping="Wrap" LineHeight="22"
-                                       FontStyle="Italic"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- Bottom: approve count bar -->
-                <Border Grid.Row="2" Padding="24,12"
-                        Background="#FF1C1C1E"
-                        BorderBrush="#FF38383A"
-                        BorderThickness="0,1,0,0">
+                <!-- Bottom Checkout Bar -->
+                <Border Grid.Row="2" Background="#FF131314" BorderBrush="#FF2C2C2E" BorderThickness="0,1,0,0" Padding="32,20">
                     <Grid>
-                        <TextBlock VerticalAlignment="Center" FontSize="13"
-                                   Foreground="#FF8E8E93">
-                            <Run Text="{Binding RO.ApprovedCount}" FontWeight="Bold"
-                                 Foreground="White"/>
-                            <Run Text=" of "/>
-                            <Run Text="{Binding RO.TotalRecommended}" FontWeight="Bold"
-                                 Foreground="White"/>
-                            <Run Text=" services approved  ·  Click a card to toggle approval"/>
-                        </TextBlock>
-                        <Button Content="💾  Save &amp; Close RO"
-                                HorizontalAlignment="Right"
-                                Background="#FF0A84FF" Foreground="White"
-                                FontWeight="SemiBold" FontSize="13"
-                                BorderThickness="0" Height="38"
-                                Padding="20,0" Cursor="Hand"
-                                Command="{Binding RO.SaveROCommand}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontSize="14" Foreground="#FF8E8E93" Margin="0,0,0,4">
+                                <Run Text="Selected Items: "/>
+                                <Run Text="{Binding RO.ApprovedCount, Mode=OneWay}" FontWeight="Bold" Foreground="White"/>
+                                <Run Text=" / "/>
+                                <Run Text="{Binding RO.TotalRecommended, Mode=OneWay}" Foreground="White"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Button HorizontalAlignment="Right"
+                                Command="{Binding RO.SaveROCommand}"
+                                Height="48" Padding="32,0" Cursor="Hand">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                                            CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border x:Name="Bd" Background="#FF30D158" CornerRadius="8">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="Finalize Order" FontSize="15" FontWeight="Bold" Foreground="White"/>
+                                            <TextBlock Text=" →" FontSize="15" FontWeight="Bold" Foreground="White" Margin="4,0,0,0"/>
+                                        </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bd" Property="Background" Value="#FF409CFF"/>
-                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Opacity" Value="0.85"/></Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
                     </Grid>
                 </Border>
+
             </Grid>
         </Grid>
     </Grid>

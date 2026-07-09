@@ -12,7 +12,7 @@
         <conv:MultiplyConverter          x:Key="Multiply"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="False">
         <StackPanel Margin="24,20">
 
             <!-- ── Header ─────────────────────────────────────────── -->

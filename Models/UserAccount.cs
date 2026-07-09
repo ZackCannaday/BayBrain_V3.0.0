@@ -39,5 +39,7 @@ namespace BayBrain.Models
                 return name.Length > 0 ? name[..Math.Min(2, name.Length)].ToUpperInvariant() : "?";
             }
         }
+
+        public override string ToString() => DisplayName;
     }
 }

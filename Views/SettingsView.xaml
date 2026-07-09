@@ -209,10 +209,10 @@
                         </StackPanel>
                         <StackPanel Grid.Column="4">
                             <TextBlock Text="PIN" FontSize="12" Foreground="#8E8E93" Margin="0,0,0,5"/>
-                            <TextBox Style="{StaticResource FieldBox}"
-                                     Text="{Binding NewUserPin, UpdateSourceTrigger=PropertyChanged}"
-                                     MaxLength="12"
-                                     HorizontalContentAlignment="Center"/>
+                            <PasswordBox x:Name="NewUserPinBox"
+                                         PasswordChanged="NewUserPinBox_PasswordChanged"
+                                         MaxLength="12"
+                                         HorizontalContentAlignment="Center"/>
                         </StackPanel>
                     </Grid>
 
