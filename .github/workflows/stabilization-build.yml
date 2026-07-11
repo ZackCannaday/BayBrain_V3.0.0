@@ -1,0 +1,68 @@
+name: BayBrain Stabilization Build
+
+on:
+  push:
+    branches:
+      - "stabilization/**"
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runner-smoke:
+    name: Verify GitHub-hosted runner access
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm runner started
+        run: echo "GitHub Actions runner is available."
+
+  cross-compile:
+    name: Cross-compile Windows projects (.NET 8 / Linux)
+    needs: runner-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore BayBrain.Tests/BayBrain.Tests.csproj -p:EnableWindowsTargeting=true
+
+      - name: Compile desktop application
+        run: dotnet build BayBrain.csproj --configuration Release --no-restore -p:EnableWindowsTargeting=true
+
+      - name: Compile regression test project
+        run: dotnet build BayBrain.Tests/BayBrain.Tests.csproj --configuration Release --no-restore -p:EnableWindowsTargeting=true
+
+  windows-build-and-test:
+    name: Build and test (.NET 8 / Windows)
+    needs: runner-smoke
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore BayBrain.Tests/BayBrain.Tests.csproj
+
+      - name: Build desktop application
+        run: dotnet build BayBrain.csproj --configuration Release --no-restore
+
+      - name: Run regression tests
+        run: dotnet test BayBrain.Tests/BayBrain.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=stabilization-tests.trx"
