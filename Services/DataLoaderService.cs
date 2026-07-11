@@ -9,7 +9,8 @@ namespace BayBrain.Services
     /// <summary>
     /// Loads and saves all persistent data — services, quiz questions,
     /// advisor profiles, repair orders, and app settings.
-    /// Files live beside the executable; no recompile needed to edit content.
+    /// Files currently live beside the executable; a later stabilization step
+    /// will migrate mutable data to the user's LocalAppData directory.
     /// </summary>
     public static class DataLoaderService
     {
@@ -79,8 +80,11 @@ namespace BayBrain.Services
             sb.AppendLine("RO ID,Date,Customer,Vehicle,Mileage,Advisor,Recommended,Performed,Total,Approval Rate");
             foreach (var ro in orders)
             {
+                var id = ro.Id ?? string.Empty;
+                var shortId = id[..Math.Min(8, id.Length)];
+
                 sb.AppendLine(string.Join(",",
-                    CsvEscape(ro.Id[..8]),
+                    CsvEscape(shortId),
                     CsvEscape(ro.CreatedAt.ToString("yyyy-MM-dd")),
                     CsvEscape(ro.CustomerName),
                     CsvEscape(ro.VehicleLabel),
@@ -88,8 +92,8 @@ namespace BayBrain.Services
                     CsvEscape(ro.AdvisorName),
                     ro.RecommendedCount,
                     ro.ApprovedCount,
-                    ro.TotalPerformed.ToString("F2"),
-                    ro.ApprovalRate.ToString("F0") + "%"
+                    ro.TotalPerformed.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                    ro.ApprovalRate.ToString("F0", System.Globalization.CultureInfo.InvariantCulture) + "%"
                 ));
             }
             return sb.ToString();
@@ -100,10 +104,14 @@ namespace BayBrain.Services
             try
             {
                 var path = ResolveDataPath(filename);
-                File.WriteAllText(path, csv, System.Text.Encoding.UTF8);
+                WriteTextAtomically(path, csv, System.Text.Encoding.UTF8);
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                Warn($"Could not save {filename}: {ex.Message}");
+                return false;
+            }
         }
 
         // ── Generic load / save ──────────────────────────────────────────
@@ -112,6 +120,22 @@ namespace BayBrain.Services
         {
             var path = ResolveDataPath(filename);
             if (!File.Exists(path)) return null;
+
+            var primary = TryDeserialize<T>(path, filename);
+            if (primary != null) return primary;
+
+            var backupPath = GetBackupPath(path);
+            if (!File.Exists(backupPath)) return null;
+
+            var recovered = TryDeserialize<T>(backupPath, $"{filename}.bak");
+            if (recovered != null)
+                Warn($"{filename} was recovered from its backup copy.");
+
+            return recovered;
+        }
+
+        private static T? TryDeserialize<T>(string path, string displayName) where T : class
+        {
             try
             {
                 var json = File.ReadAllText(path);
@@ -119,7 +143,7 @@ namespace BayBrain.Services
             }
             catch (Exception ex)
             {
-                Warn($"{filename} failed to load: {ex.Message}");
+                Warn($"{displayName} failed to load: {ex.Message}");
                 return null;
             }
         }
@@ -129,7 +153,12 @@ namespace BayBrain.Services
             try
             {
                 var path = ResolveDataPath(filename);
-                File.WriteAllText(path, JsonSerializer.Serialize(data, _opts));
+                var json = JsonSerializer.Serialize(data, _opts);
+
+                // Validate the serialized document before replacing any valid file.
+                using (JsonDocument.Parse(json)) { }
+
+                WriteTextAtomically(path, json, System.Text.Encoding.UTF8);
                 return true;
             }
             catch (Exception ex)
@@ -138,6 +167,62 @@ namespace BayBrain.Services
                 return false;
             }
         }
+
+        private static void WriteTextAtomically(string path, string content, System.Text.Encoding encoding)
+        {
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
+
+            var tempPath = path + ".tmp";
+            var backupPath = GetBackupPath(path);
+
+            try
+            {
+                using (var stream = new FileStream(
+                           tempPath,
+                           FileMode.Create,
+                           FileAccess.Write,
+                           FileShare.None,
+                           bufferSize: 4096,
+                           options: FileOptions.WriteThrough))
+                using (var writer = new StreamWriter(stream, encoding))
+                {
+                    writer.Write(content);
+                    writer.Flush();
+                    stream.Flush(flushToDisk: true);
+                }
+
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        File.Replace(tempPath, path, backupPath, ignoreMetadataErrors: true);
+                    }
+                    catch (PlatformNotSupportedException)
+                    {
+                        File.Copy(path, backupPath, overwrite: true);
+                        File.Move(tempPath, path, overwrite: true);
+                    }
+                    catch (IOException)
+                    {
+                        File.Copy(path, backupPath, overwrite: true);
+                        File.Move(tempPath, path, overwrite: true);
+                    }
+                }
+                else
+                {
+                    File.Move(tempPath, path);
+                }
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
+        }
+
+        private static string GetBackupPath(string path) => path + ".bak";
 
         private static string ResolveDataPath(string filename)
         {
@@ -150,13 +235,13 @@ namespace BayBrain.Services
             })
                 if (File.Exists(candidate)) return candidate;
 
-            return Path.Combine(exeDir, filename);   // default write location
+            return Path.Combine(exeDir, filename);   // temporary default until LocalAppData migration
         }
 
         private static string CsvEscape(string? s)
         {
             s ??= string.Empty;
-            return s.Contains(',') || s.Contains('"') || s.Contains('\n')
+            return s.Contains(',') || s.Contains('"') || s.Contains('\n') || s.Contains('\r')
                 ? $"\"{s.Replace("\"", "\"\"")}\"" : s;
         }
 
